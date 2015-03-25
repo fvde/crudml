@@ -4,12 +4,12 @@
 package tum.ma.crudml.generator
 
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess
+import org.eclipse.xtext.generator.IGenerator
 import tum.ma.crudml.crudml.Entity
+import tum.ma.crudml.generator.access.ExtendedFile
+import tum.ma.crudml.generator.access.ExtendedFileSystemAccess
 import tum.ma.crudml.scout.ScoutProjectGenerator
-import org.eclipse.xtext.generator.IFileSystemAccessExtension
-import org.eclipse.xtext.generator.OutputConfigurationProvider
 
 /**
  * Generates code from your model files on save.
@@ -17,13 +17,22 @@ import org.eclipse.xtext.generator.OutputConfigurationProvider
  * see http://www.eclipse.org/Xtext/documentation.html#TutorialCodeGeneration
  */
 class CrudmlGenerator implements IGenerator {
+		
+	//TODO expose in crudml
+	val workspaceFolder = "Application"
+	val applicationName = "app"
+	val author = "fvde"
 	
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
-		
+
 		var efsa = new ExtendedFileSystemAccess(fsa);
 		
 		// Start by generating the template project	
 		createProjectTemplate(efsa)
+		
+		// Create extended files and markers
+		val standardOutline = new ExtendedFile(workspaceFolder + "/" + applicationName + ".client/src/" + applicationName + "/client/ui/desktop/outlines/StandardOutline.java", "StandardOutline.java")
+		standardOutline.addMarker("title", 19, 1)
 	
 		// Debug information		
 		fsa.generateFile('debug.txt', 'Stuff to greet: ' + 
@@ -36,10 +45,11 @@ class CrudmlGenerator implements IGenerator {
 				+ resource.URI
 				+ System.getProperty("user.dir"))
 
-		//efsa.deleteFile('debug.txt');
+		efsa.updateLines(standardOutline, "title", "\t return TEXTS.get(\"#yolo\");") 
+		
 	}
 	
 	def createProjectTemplate(ExtendedFileSystemAccess fsa){
-		ScoutProjectGenerator.generateScoutTemplateProject("Application", "app", "app", "fvde", fsa);	
+		ScoutProjectGenerator.generateScoutTemplateProject(workspaceFolder, applicationName, applicationName, author, fsa);	
 	} 
 }

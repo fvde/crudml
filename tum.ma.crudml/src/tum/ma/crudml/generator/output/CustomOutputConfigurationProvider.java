@@ -1,4 +1,4 @@
-package tum.ma.crudml.generator;
+package tum.ma.crudml.generator.output;
 
 import java.util.HashSet;
 import java.util.Set;

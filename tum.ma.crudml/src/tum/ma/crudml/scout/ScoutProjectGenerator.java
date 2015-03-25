@@ -3,13 +3,12 @@ package tum.ma.crudml.scout;
 import java.io.File;
 import java.util.List;
 
-import org.eclipse.xtext.generator.IFileSystemAccess;
 import org.eclipselabs.scwork.template.InputParam;
 import org.eclipselabs.scwork.template.ProjectType;
 import org.eclipselabs.scwork.template.TemplateUtility;
 import org.eclipselabs.scwork.template.generator.IFileGenerator;
 
-import tum.ma.crudml.generator.ExtendedFileSystemAccess;
+import tum.ma.crudml.generator.access.ExtendedFileSystemAccess;
 
 public class ScoutProjectGenerator {
 

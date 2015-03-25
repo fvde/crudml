@@ -1,9 +1,6 @@
 package org.eclipselabs.scwork.template
 
-import com.google.common.base.Charsets
-import com.google.common.io.ByteStreams
 import com.google.common.io.Files
-import com.google.common.reflect.ClassPath
 import java.io.File
 import java.util.Arrays
 import java.util.List
@@ -73,6 +70,7 @@ import org.eclipselabs.scwork.template.generator.target.TargetDotProjectGenerato
 import org.eclipselabs.scwork.template.generator.target.TargetGenerator
 import org.eclipselabs.scwork.template.generator.uirap.ApplicationCssGenerator
 import org.eclipselabs.scwork.template.generator.uirap.HtmlStylesCssGenerator
+import org.eclipselabs.scwork.template.generator.uirap.LoadingGifGenerator
 import org.eclipselabs.scwork.template.generator.uirap.LogoutHtmlGenerator
 import org.eclipselabs.scwork.template.generator.uirap.MobileStandaloneRwtEnvironmentJavaGenerator
 import org.eclipselabs.scwork.template.generator.uirap.RapActivatorJavaGenerator
@@ -87,6 +85,8 @@ import org.eclipselabs.scwork.template.generator.uirap.RapOrgEclipseJdtUiPrefsGe
 import org.eclipselabs.scwork.template.generator.uirap.RapPluginXmlGenerator
 import org.eclipselabs.scwork.template.generator.uirap.RapProdConfigIniGenerator
 import org.eclipselabs.scwork.template.generator.uirap.RapProdRapProductGenerator
+import org.eclipselabs.scwork.template.generator.uirap.RapScoutGifGenerator
+import org.eclipselabs.scwork.template.generator.uirap.ScoutBackgroundPngGenerator
 import org.eclipselabs.scwork.template.generator.uirap.StandaloneRwtEnvironmentJavaGenerator
 import org.eclipselabs.scwork.template.generator.uirap.StartupBodyHtmlGenerator
 import org.eclipselabs.scwork.template.generator.uirap.TabletStandaloneRwtEnvironmentJavaGenerator
@@ -115,10 +115,14 @@ import org.eclipselabs.scwork.template.generator.uiswt.NorthEastViewJavaGenerato
 import org.eclipselabs.scwork.template.generator.uiswt.NorthViewJavaGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.NorthWestViewJavaGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.PerspectiveJavaGenerator
+import org.eclipselabs.scwork.template.generator.uiswt.ProgressViewGifGenerator
+import org.eclipselabs.scwork.template.generator.uiswt.Scout16GifGenerator
+import org.eclipselabs.scwork.template.generator.uiswt.Scout32GifGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.ScoutEditorPartJavaGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.SouthEastViewJavaGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.SouthViewJavaGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.SouthWestViewJavaGenerator
+import org.eclipselabs.scwork.template.generator.uiswt.SplashBmpGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.SwtActivatorJavaGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.SwtBuildPropertiesGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.SwtDevConfigIniGenerator
@@ -132,26 +136,12 @@ import org.eclipselabs.scwork.template.generator.uiswt.SwtOrgEclipseJdtUiPrefsGe
 import org.eclipselabs.scwork.template.generator.uiswt.SwtPluginXmlGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.SwtProdConfigIniGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.SwtProdSwtProductGenerator
+import org.eclipselabs.scwork.template.generator.uiswt.SwtScoutGifGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.SwtStartupJavaGenerator
 import org.eclipselabs.scwork.template.generator.uiswt.WestViewJavaGenerator
-import org.eclipselabs.scwork.template.generator.uiswt.ProgressViewGifGenerator
-import org.eclipselabs.scwork.template.generator.uiswt.Scout16GifGenerator
-import org.eclipselabs.scwork.template.generator.uiswt.Scout32GifGenerator
-import org.eclipselabs.scwork.template.generator.uiswt.SplashBmpGenerator
-import org.eclipselabs.scwork.template.generator.uiswt.SwtScoutGifGenerator
-import org.eclipselabs.scwork.template.generator.uirap.LoadingGifGenerator
-import org.eclipselabs.scwork.template.generator.uirap.RapScoutGifGenerator
-import org.eclipselabs.scwork.template.generator.uirap.ScoutBackgroundPngGenerator
-import tum.ma.crudml.scout.ScoutProjectGenerator
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.io.FileReader
-import java.io.BufferedReader
-import java.nio.CharBuffer
+import tum.ma.crudml.generator.access.ExtendedFile
 
 class TemplateUtility {
-	
-	private static final int DEFAULT_BUFFER_SIZE = 100000;
 	
 	def static List<IFileGenerator> getAllGenerators() {
 		Arrays.asList(
@@ -324,16 +314,14 @@ class TemplateUtility {
 	}
 	
 	def static private dispatch void writeToFile(ITextFileGenerator g, InputParam param, File file) {
-		//Files.write(g.provideContent(param), file, Charsets.UTF_8)
-		param.fileSystemAccess.generateFile(file.toString, g.provideContent(param));
+		param.fileSystemAccess.generateFile(new ExtendedFile(file), g.provideContent(param));
 	}
 	
 	def static private dispatch void writeToFile(IBinFileGenerator g, InputParam param, File file) {
 		//val source = new File("../../../bin/org/eclipselabs/scwork/template/bin/", g.provideResourceName);
 		
 		//TODO Use real source folder, i.e. pass files from workspace
-		val source = new File("../images/", g.provideResourceName);
-		val contents = param.fileSystemAccess.readBinaryFile(source.toString)
-		param.fileSystemAccess.generateFile(file.toString, contents)
+		val contents = param.fileSystemAccess.readBinaryFile(new ExtendedFile("../images/" + g.provideResourceName, g.provideResourceName))
+		param.fileSystemAccess.generateFile(new ExtendedFile(file), contents)
 	}
 }

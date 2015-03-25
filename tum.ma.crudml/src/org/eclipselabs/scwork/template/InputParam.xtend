@@ -2,8 +2,7 @@ package org.eclipselabs.scwork.template
 
 import java.io.File
 import org.eclipse.xtend.lib.annotations.Accessors
-import org.eclipse.xtext.generator.IFileSystemAccess
-import tum.ma.crudml.generator.ExtendedFileSystemAccess
+import tum.ma.crudml.generator.access.ExtendedFileSystemAccess
 
 @Accessors class InputParam {
 	

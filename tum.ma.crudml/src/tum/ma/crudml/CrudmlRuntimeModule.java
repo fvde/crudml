@@ -5,7 +5,7 @@ package tum.ma.crudml;
 
 import org.eclipse.xtext.generator.IOutputConfigurationProvider;
 
-import tum.ma.crudml.generator.CustomOutputConfigurationProvider;
+import tum.ma.crudml.generator.output.CustomOutputConfigurationProvider;
 
 import com.google.inject.Binder;
 import com.google.inject.Singleton;
