@@ -1,0 +1,10 @@
+syntax: glob
+.metadata
+tum.ma.crudml.ui/bin
+tum.ma.crudml.tests/bin
+tum.ma.crudml.ui/src-gen
+tum.ma.crudml.tests/src-gen
+tum.ma.crudml.ui/xtend-gen
+tum.ma.crudml/bin
+tum.ma.crudml/src-gen
+tum.ma.crudml/xtend-gen

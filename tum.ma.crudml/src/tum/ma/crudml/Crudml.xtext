@@ -1,0 +1,99 @@
+grammar tum.ma.crudml.Crudml with org.eclipse.xtext.common.Terminals
+
+generate crudml "http://www.ma.tum/crudml/Crudml"
+
+Domainmodel:
+  (elements += AbstractElement)*
+;
+ 
+/* Package & import block */ 
+PackageDeclaration:
+  'package' name = QualifiedName '{'
+    (elements += AbstractElement)*
+  '}'
+;
+ 
+AbstractElement:
+  PackageDeclaration | Entity | Import | Right | Role
+;
+ 
+QualifiedName:
+  ID ('.' ID)*
+;
+ 
+Import:
+  'import' importedNamespace = QualifiedNameWithWildcard
+;
+  
+QualifiedNameWithWildcard:
+  QualifiedName '.*'?
+;
+  
+/* Entity block */
+Entity:
+  (annotations += Annotation)*	
+  'entity' name = ID             
+  '{'
+    (attributes += Attribut)*
+  '}'
+;
+
+/* Annotation block */
+Annotation:
+  '@' UiLevel
+;
+
+UiLevel:
+	'UiLevel'level = INT
+;
+
+/* Attribute block */
+Attribut:
+	Reference | Variable
+;
+
+Variable:
+	name = ID ':' (type = [Entity | QualifiedName] | primitive = ('string' | 'int' | 'boolean' | 'long'))
+;
+
+Reference:
+	SingleEntityReference | MultiEntityReference
+;
+
+MultiEntityReference:
+	(many ?= 'many') multirefname = ID ':' type = [Entity | QualifiedName]
+;
+
+SingleEntityReference:
+	(one ?= 'one') singlerefname = ID ':' type = [Entity | QualifiedName]
+;
+
+/* Operations block */
+Operations:
+	('all' | (Operation)+)
+;
+
+Operation:
+	'create' | 'read' | 'update' |'delete'
+;
+
+/* Rights and access control */
+
+Role:
+  'role' name = ID             
+  '{'
+  	('init' initialization = ('assigned' | 'first'))?
+    (rights += [Right] | 'all')*
+  '}'
+;
+
+Right:
+  'right' name = ID             
+  ('{'
+    (accesses += Access)*
+  '}')?
+;
+
+Access:
+	type = [Entity | QualifiedName] ':' operations = Operations
+;
