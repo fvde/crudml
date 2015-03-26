@@ -13,6 +13,10 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 	private IFileSystemAccess fileSystemAccess
 	private String outputConfigurationName = IFileSystemAccess.DEFAULT_OUTPUT
 	
+	new(){
+		// Make sure to set fileSystemAccess manually!
+	}
+	
 	new(IFileSystemAccess access) {
 		fileSystemAccess = access
 	}
@@ -64,22 +68,34 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 	def private deleteLines(ExtendedFile file, int from, int to){
 		val currentContents = readTextFile(file)
 		val lines = currentContents.toString.split(System.getProperty("line.separator"))
-		val result = lines.filter[x | lines.indexOf(x) < from || lines.indexOf(x) > to]
+		val result = lines.filter[x | lines.indexOf(x) < from - 1 || lines.indexOf(x) >= to - 1]
 		
+		// Update file
 		generateFile(file, GeneratorUtilities.getStringFromArray(result))
+		
+		// Update markers
+		file.insertLines(to - from - 1, from)
 	}
 	
 	def private insertLines(ExtendedFile file, String lines, int atLine){
 		val currentContents = readTextFile(file)
 		val currentLines = currentContents.toString.split(System.getProperty("line.separator")).toList
 		val newLines = lines.split(System.getProperty("line.separator")).toList
-		val result = GeneratorUtilities.mergeAtLine(currentLines, newLines, atLine)
+		val result = GeneratorUtilities.mergeAtLine(currentLines, newLines, atLine - 1)
 		
+		// Update file
 		generateFile(file, GeneratorUtilities.getStringFromArray(result))
+		
+		// Update markers
+		file.insertLines(newLines.length, atLine)
 	}
 	
 	def updateLines(ExtendedFile file, String identifier, String update){
 		val marker = file.getMarker(identifier)
+		
+		if (marker == null){
+			throw new Exception("Specified marker not found!")
+		}
 		
 		// delete lines if marker has size
 		if (marker.size > 0){
@@ -90,6 +106,10 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 		if (!update.isNullOrEmpty){
 			insertLines(file, update, marker.line)
 		}
+	}
+	
+	def addCharToLine(){
+		
 	}
 
 }

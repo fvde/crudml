@@ -10,6 +10,10 @@ import tum.ma.crudml.crudml.Entity
 import tum.ma.crudml.generator.access.ExtendedFile
 import tum.ma.crudml.generator.access.ExtendedFileSystemAccess
 import tum.ma.crudml.scout.ScoutProjectGenerator
+import tum.ma.crudml.generator.access.Identifier
+import java.util.Map
+import java.util.HashMap
+import tum.ma.crudml.generator.access.Component
 
 /**
  * Generates code from your model files on save.
@@ -22,34 +26,108 @@ class CrudmlGenerator implements IGenerator {
 	val workspaceFolder = "Application"
 	val applicationName = "app"
 	val author = "fvde"
+	val dbAccess = "jdbc:derby:C:\\\\db\\\\DerbyDB"
+	val dbUser = "minicrm"
+	val dbPassword = "minicrm"
+	
+	// Some local variables
+	val extendedFileSystemAccess = new ExtendedFileSystemAccess();
+	val Map<Identifier, ExtendedFile> files = new HashMap<Identifier, ExtendedFile>()
 	
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
 
-		var efsa = new ExtendedFileSystemAccess(fsa);
-		
+		extendedFileSystemAccess.fileSystemAccess = fsa
+
 		// Start by generating the template project	
-		createProjectTemplate(efsa)
+		generateProjectTemplate()
 		
 		// Create extended files and markers
-		val standardOutline = new ExtendedFile(workspaceFolder + "/" + applicationName + ".client/src/" + applicationName + "/client/ui/desktop/outlines/StandardOutline.java", "StandardOutline.java")
-		standardOutline.addMarker("title", 19, 1)
-	
-		// Debug information		
-		fsa.generateFile('debug.txt', 'Stuff to greet: ' + 
-			resource.allContents
-				.filter(typeof(Entity))
-				.map[name]
-				.join(', ')
-				+
-				'\n /// Debug: /// \n' 
-				+ resource.URI
-				+ System.getProperty("user.dir"))
+		generateMarkers()
+		
+		// Create database connection
+		generateDatabaseConnection()
 
-		efsa.updateLines(standardOutline, "title", "\t return TEXTS.get(\"#yolo\");") 
+		extendedFileSystemAccess.updateLines(files.get(Identifier.StandardOutline), "title", "\t return TEXTS.get(\"#yolo\");") 
 		
 	}
 	
-	def createProjectTemplate(ExtendedFileSystemAccess fsa){
-		ScoutProjectGenerator.generateScoutTemplateProject(workspaceFolder, applicationName, applicationName, author, fsa);	
+	def generateProjectTemplate(){
+		ScoutProjectGenerator.generateScoutTemplateProject(workspaceFolder, applicationName, applicationName, author, extendedFileSystemAccess);	
 	} 
+	
+	def generateMarkers(){
+		var standardOutline = createFile(Identifier.StandardOutline, "src/" + applicationName + "/client/ui/desktop/outlines/StandardOutline.java", Component.client)
+		standardOutline.addMarker("title", 20, 1)
+		var servermanifest = createFile(Identifier.ServerManifest, "META-INF/MANIFEST.MF", Component.server)
+		servermanifest.addMarker("exportpackages", 11, 0)
+		var serverplugin = createFile(Identifier.ServerPlugin, "plugin.xml", Component.server)
+		serverplugin.addMarker("extensionservice", 27, 0)
+	}
+	
+	def generateDatabaseConnection(){	
+	
+		// create reference to export package
+		//TODO insert "," before
+		extendedFileSystemAccess.updateLines(files.get(Identifier.ServerManifest), "exportpackages",
+'''	
+ «applicationName».server.services.common.sql	
+''') 
+		
+		// create reference to service
+		extendedFileSystemAccess.updateLines(files.get(Identifier.ServerPlugin), "extensionservice",
+'''
+<service
+		factory="org.eclipse.scout.rt.server.services.ServerServiceFactory"
+		class="«applicationName».server.services.common.sql.DerbySqlService"
+		session="«applicationName».server.ServerSession">
+</service>
+''')
+
+  		// Create sql service
+  		extendedFileSystemAccess.generateFile(createFile(Identifier.ServerSqlService, "src/" + applicationName + "/server/services/common/sql/DerbySqlService.java", Component.server),
+'''
+/**
+ * 
+ */
+package «applicationName».server.services.common.sql;
+
+import org.eclipse.scout.rt.services.common.jdbc.AbstractDerbySqlService;
+
+/**
+ * @author «author»
+ */
+public class DerbySqlService extends AbstractDerbySqlService {
+	
+	@Override
+	protected String getConfiguredJdbcMappingName() {
+		return "«dbAccess»";
+	}
+		
+	@Override
+	protected String getConfiguredPassword() {
+		return "«dbPassword»";
+	}
+		
+	@Override
+	protected String getConfiguredUsername() {
+		return "«dbUser»";
+	}
+}
+''')
+  		
+	}	
+
+	def createFile(Identifier ident, String path, Component comp){
+		var name = path.split("/").last
+		var file = new ExtendedFile(prefix(comp) + path, name)
+		files.put(ident, file)
+		return file
+	}
+			
+	/**
+	* Creates something like "Workspacefolder/applicationname.component/"
+	**/	
+	def prefix(Component comp){
+		return workspaceFolder + "/" + applicationName + "."+ comp.toString + "/"
+	}
 }

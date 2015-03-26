@@ -14,7 +14,7 @@ import org.eclipse.xtend.lib.annotations.Accessors
 	new(File file){
 		this(file.path, file.name)
 	}
-	
+
 	new(String path, String name){
 		this.path = path
 		this.name = name
@@ -35,5 +35,13 @@ import org.eclipse.xtend.lib.annotations.Accessors
 	
 	def getMarker(String identifier){
 		markers.get(identifier)
+	}
+	
+	def insertLines(int numberOfLines, int atLine){
+		for (FileMarker marker : markers.values){
+			if (marker.line > atLine){
+				marker.line = marker.line + numberOfLines
+			}
+		}
 	}
 }
