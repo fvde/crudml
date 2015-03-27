@@ -14,7 +14,7 @@ PackageDeclaration:
 ;
  
 AbstractElement:
-  PackageDeclaration | Entity | Import | Right | Role
+  PackageDeclaration | Entity | Import | Right | Role | Metadata
 ;
  
 QualifiedName:
@@ -27,6 +27,17 @@ Import:
   
 QualifiedNameWithWildcard:
   QualifiedName '.*'?
+;
+
+Metadata:
+	'metadata' 
+	'{'
+	  (entries += MetadataEntry)*
+	'}'
+;
+
+MetadataEntry:
+	(type = ('workspace' | 'applicationName' | 'author' )) ':' value = ID
 ;
   
 /* Entity block */

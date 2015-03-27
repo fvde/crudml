@@ -90,7 +90,7 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 		file.insertLines(newLines.length, atLine)
 	}
 	
-	def updateLines(ExtendedFile file, String identifier, String update){
+	def modifyLines(ExtendedFile file, String identifier, String modification){
 		val marker = file.getMarker(identifier)
 		
 		if (marker == null){
@@ -103,13 +103,21 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 		}
 
 		// insert lines if there are any
-		if (!update.isNullOrEmpty){
-			insertLines(file, update, marker.line)
+		if (!modification.isNullOrEmpty){
+			insertLines(file, modification, marker.line)
 		}
 	}
 	
-	def addCharToLine(){
+	def addToLine(ExtendedFile file, String identifier, String addition){	
+		val marker = file.getMarker(identifier)
 		
+		if (marker != null && marker.size == 0){
+			val contents = readTextFile(file)
+			var lines = contents.toString.split(System.getProperty("line.separator")).toList
+			lines.set(marker.line - 1, lines.get(marker.line - 1) + addition)
+			
+			// Update file (No markers have changed!)
+			generateFile(file, GeneratorUtilities.getStringFromArray(lines))
+		}
 	}
-
 }

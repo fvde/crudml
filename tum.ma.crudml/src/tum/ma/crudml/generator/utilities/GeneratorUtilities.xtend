@@ -19,6 +19,12 @@ class GeneratorUtilities {
 	def static mergeAtLine(Iterable<String> a, Iterable<String> b, int line){
 		var result = new ArrayList<String>();
 		
+		if (line >= a.length){
+			result.addAll(a)
+			result.addAll(b)
+			return result
+		}	
+		
 		for (var index = 0; index < a.length; index++){
 			if (index == line){
 				for (String newline : b){
@@ -29,6 +35,6 @@ class GeneratorUtilities {
 			result.add(a.get(index))
 		}
 		
-		return result;
+		return result
 	}
 }

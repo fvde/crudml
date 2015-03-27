@@ -1,21 +1,23 @@
-package tum.ma.crudml.scout;
+package tum.ma.crudml.generator.template;
 
 import java.io.File;
 import java.util.List;
 
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipselabs.scwork.template.InputParam;
 import org.eclipselabs.scwork.template.ProjectType;
 import org.eclipselabs.scwork.template.TemplateUtility;
 import org.eclipselabs.scwork.template.generator.IFileGenerator;
 
+import tum.ma.crudml.generator.CrudmlGenerator;
+import tum.ma.crudml.generator.IExtendedGenerator;
 import tum.ma.crudml.generator.access.ExtendedFileSystemAccess;
 
-public class ScoutProjectGenerator {
+public class ScoutProjectGenerator implements IExtendedGenerator{
 
-	public static void generateScoutTemplateProject(String workspaceName,
-			String projectAlias, String projectName, String authorName,
-			ExtendedFileSystemAccess fsa) {
-
+	@Override
+	public void doGenerate(Resource input, ExtendedFileSystemAccess fsa) {
+		
 		InputParam param = new InputParam();
 		
 		// File access
@@ -23,13 +25,13 @@ public class ScoutProjectGenerator {
 
 		// Folder where the projects will be generated:
 
-		if (workspaceName != "") {
-			param.setWorkspaceFolder(new File(workspaceName));
+		if (CrudmlGenerator.workspaceFolder != "") {
+			param.setWorkspaceFolder(new File(CrudmlGenerator.workspaceFolder));
 		}
 
 		// Project names:
-		param.setProjectAlias(projectAlias);
-		param.setProjectName(projectName);
+		param.setProjectAlias(CrudmlGenerator.applicationName);
+		param.setProjectName(CrudmlGenerator.applicationName);
 
 		// Flags to indicate which project should be created:
 		param.setClientIncluded(true);
@@ -43,11 +45,11 @@ public class ScoutProjectGenerator {
 		param.setProjectType(ProjectType.OUTLINE_BASED_APPLICATION);
 
 		// Additional configuration:
-		param.setAuthorName(authorName);
+		param.setAuthorName(CrudmlGenerator.author);
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("/*******************************************************************************\n");
-		sb.append(" * Copyright (c) 2015 " + authorName + " .\n");
+		sb.append(" * Copyright (c) 2015 " + CrudmlGenerator.author + " .\n");
 		sb.append(" * All rights reserved. This program and the accompanying materials\n");
 		sb.append(" * are made available under the terms of the Eclipse Public License v1.0\n");
 		sb.append(" * which accompanies this distribution, and is available at\n");

@@ -9,11 +9,17 @@ import org.eclipse.xtext.generator.IGenerator
 import tum.ma.crudml.crudml.Entity
 import tum.ma.crudml.generator.access.ExtendedFile
 import tum.ma.crudml.generator.access.ExtendedFileSystemAccess
-import tum.ma.crudml.scout.ScoutProjectGenerator
 import tum.ma.crudml.generator.access.Identifier
 import java.util.Map
 import java.util.HashMap
 import tum.ma.crudml.generator.access.Component
+import java.util.ArrayList
+import java.util.List
+import java.util.Arrays
+import tum.ma.crudml.generator.template.ScoutProjectGenerator
+import tum.ma.crudml.generator.database.ServerSqlServiceGenerator
+import tum.ma.crudml.crudml.Metadata
+import tum.ma.crudml.crudml.MetadataEntry
 
 /**
  * Generates code from your model files on save.
@@ -23,111 +29,76 @@ import tum.ma.crudml.generator.access.Component
 class CrudmlGenerator implements IGenerator {
 		
 	//TODO expose in crudml
-	val workspaceFolder = "Application"
-	val applicationName = "app"
-	val author = "fvde"
-	val dbAccess = "jdbc:derby:C:\\\\db\\\\DerbyDB"
-	val dbUser = "minicrm"
-	val dbPassword = "minicrm"
+	public static String workspaceFolder = "Application"
+	public static String applicationName = "app"
+	public static String author = "fvde"
+	public static String dbAccess = "jdbc:derby:C:\\\\db\\\\DerbyDB"
+	public static String dbUser = "minicrm"
+	public static String dbPassword = "minicrm"
 	
 	// Some local variables
-	val extendedFileSystemAccess = new ExtendedFileSystemAccess();
-	val Map<Identifier, ExtendedFile> files = new HashMap<Identifier, ExtendedFile>()
+	public static Map<Identifier, ExtendedFile> Files = new HashMap<Identifier, ExtendedFile>()
+	private List<IExtendedGenerator> oneTimeGenerators;
 	
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
 
-		extendedFileSystemAccess.fileSystemAccess = fsa
-
-		// Start by generating the template project	
-		generateProjectTemplate()
+		// extend file system access
+		val efsa = new ExtendedFileSystemAccess(fsa)
+		
+		// Create template
+		var templateGenerator = new ScoutProjectGenerator()
+		templateGenerator.doGenerate(resource, efsa)
 		
 		// Create extended files and markers
 		generateMarkers()
 		
-		// Create database connection
-		generateDatabaseConnection()
-
-		extendedFileSystemAccess.updateLines(files.get(Identifier.StandardOutline), "title", "\t return TEXTS.get(\"#yolo\");") 
+		// Parse metadata
+		parseMetadata(resource)
 		
+		// Register onetime generators
+		oneTimeGenerators = Arrays.asList(
+			new ServerSqlServiceGenerator		
+		)
+		
+		// Generate one time components
+		for (IExtendedGenerator generator : oneTimeGenerators){
+			generator.doGenerate(resource, efsa)
+		}
 	}
-	
-	def generateProjectTemplate(){
-		ScoutProjectGenerator.generateScoutTemplateProject(workspaceFolder, applicationName, applicationName, author, extendedFileSystemAccess);	
-	} 
 	
 	def generateMarkers(){
 		var standardOutline = createFile(Identifier.StandardOutline, "src/" + applicationName + "/client/ui/desktop/outlines/StandardOutline.java", Component.client)
 		standardOutline.addMarker("title", 20, 1)
 		var servermanifest = createFile(Identifier.ServerManifest, "META-INF/MANIFEST.MF", Component.server)
 		servermanifest.addMarker("exportpackages", 11, 0)
+		servermanifest.addMarker("previousexportpackage", 10, 0)
+		servermanifest.addMarker("laststatement", 22, 0)
 		var serverplugin = createFile(Identifier.ServerPlugin, "plugin.xml", Component.server)
 		serverplugin.addMarker("extensionservice", 27, 0)
 	}
 	
-	def generateDatabaseConnection(){	
-	
-		// create reference to export package
-		//TODO insert "," before
-		extendedFileSystemAccess.updateLines(files.get(Identifier.ServerManifest), "exportpackages",
-'''	
- «applicationName».server.services.common.sql	
-''') 
-		
-		// create reference to service
-		extendedFileSystemAccess.updateLines(files.get(Identifier.ServerPlugin), "extensionservice",
-'''
-<service
-		factory="org.eclipse.scout.rt.server.services.ServerServiceFactory"
-		class="«applicationName».server.services.common.sql.DerbySqlService"
-		session="«applicationName».server.ServerSession">
-</service>
-''')
-
-  		// Create sql service
-  		extendedFileSystemAccess.generateFile(createFile(Identifier.ServerSqlService, "src/" + applicationName + "/server/services/common/sql/DerbySqlService.java", Component.server),
-'''
-/**
- * 
- */
-package «applicationName».server.services.common.sql;
-
-import org.eclipse.scout.rt.services.common.jdbc.AbstractDerbySqlService;
-
-/**
- * @author «author»
- */
-public class DerbySqlService extends AbstractDerbySqlService {
-	
-	@Override
-	protected String getConfiguredJdbcMappingName() {
-		return "«dbAccess»";
+	def parseMetadata(Resource resource){
+		val entries = resource.allContents.toIterable.filter(MetadataEntry)
+		for (MetadataEntry entry : entries){
+			switch entry {
+				case entry.type == "applicationName" : applicationName = entry.value
+				case entry.type == "author" : author = entry.value
+				case entry.type == "workspace" : workspaceFolder = entry.value
+			}
+		}
 	}
-		
-	@Override
-	protected String getConfiguredPassword() {
-		return "«dbPassword»";
-	}
-		
-	@Override
-	protected String getConfiguredUsername() {
-		return "«dbUser»";
-	}
-}
-''')
-  		
-	}	
 
-	def createFile(Identifier ident, String path, Component comp){
+	def static createFile(Identifier ident, String path, Component comp){
 		var name = path.split("/").last
 		var file = new ExtendedFile(prefix(comp) + path, name)
-		files.put(ident, file)
+		Files.put(ident, file)
 		return file
 	}
 			
 	/**
 	* Creates something like "Workspacefolder/applicationname.component/"
 	**/	
-	def prefix(Component comp){
+	def static prefix(Component comp){
 		return workspaceFolder + "/" + applicationName + "."+ comp.toString + "/"
 	}
 }
