@@ -13,7 +13,7 @@ class ServerSqlServiceGenerator implements IExtendedGenerator{
 
 		// create reference to export package
 		fsa.addToLine(CrudmlGenerator.Files.get(Identifier.ServerManifest), "previousexportpackage", ",")
-		fsa.addToLine(CrudmlGenerator.Files.get(Identifier.ServerManifest), "laststatement", "Delete: thisline")
+		fsa.modifyLines(CrudmlGenerator.Files.get(Identifier.ServerManifest), "laststatement", "Delete: thisline")
 		fsa.modifyLines(CrudmlGenerator.Files.get(Identifier.ServerManifest), "exportpackages",''' «CrudmlGenerator.applicationName».server.services.common.sql''') 
 		
 		// create reference to service
