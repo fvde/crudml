@@ -7,7 +7,7 @@ import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.generator.access.Component
 import tum.ma.crudml.generator.CrudmlGenerator
 
-class ServerSqlServiceGenerator implements IExtendedGenerator{
+class ServerSqlServiceGenerator implements IExtendedGenerator {
 	
 	override doGenerate(Resource input, ExtendedFileSystemAccess fsa) {
 

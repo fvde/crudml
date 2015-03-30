@@ -20,6 +20,8 @@ import tum.ma.crudml.generator.template.ScoutProjectGenerator
 import tum.ma.crudml.generator.database.ServerSqlServiceGenerator
 import tum.ma.crudml.crudml.Metadata
 import tum.ma.crudml.crudml.MetadataEntry
+import tum.ma.crudml.generator.entity.EntityGenerator
+import tum.ma.crudml.generator.general.MetadataGenerator
 
 /**
  * Generates code from your model files on save.
@@ -31,7 +33,7 @@ class CrudmlGenerator implements IGenerator {
 	//TODO expose in crudml
 	public static String workspaceFolder = "Application"
 	public static String applicationName = "app"
-	public static String author = "fvde"
+	public static String author = "default"
 	public static String dbAccess = "jdbc:derby:C:\\\\db\\\\DerbyDB"
 	public static String dbUser = "minicrm"
 	public static String dbPassword = "minicrm"
@@ -39,25 +41,31 @@ class CrudmlGenerator implements IGenerator {
 	// Some local variables
 	public static Map<Identifier, ExtendedFile> Files = new HashMap<Identifier, ExtendedFile>()
 	private List<IExtendedGenerator> oneTimeGenerators;
+	private static List<String> registeredStrings;
 	
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
 
 		// extend file system access
 		val efsa = new ExtendedFileSystemAccess(fsa)
 		
+		// reset strings
+		registeredStrings = new ArrayList<String>();
+		
 		// Create template
 		var templateGenerator = new ScoutProjectGenerator()
 		templateGenerator.doGenerate(resource, efsa)
 		
 		// Create extended files and markers
-		generateMarkers()
+		registerMarkers()
 		
 		// Parse metadata
 		parseMetadata(resource)
 		
 		// Register onetime generators
 		oneTimeGenerators = Arrays.asList(
-			new ServerSqlServiceGenerator		
+			new MetadataGenerator,
+			new ServerSqlServiceGenerator,
+			new EntityGenerator
 		)
 		
 		// Generate one time components
@@ -66,15 +74,30 @@ class CrudmlGenerator implements IGenerator {
 		}
 	}
 	
-	def generateMarkers(){
+	def registerMarkers(){
+		/// CLIENT ///
 		var standardOutline = createFile(Identifier.StandardOutline, "src/" + applicationName + "/client/ui/desktop/outlines/StandardOutline.java", Component.client)
 		standardOutline.addMarker("title", 20, 1)
+		standardOutline.addMarker("imports", 9, 0)
+		standardOutline.addMarker("content", 21, 0)
+		var clientmanifest = createFile(Identifier.ClientManifest, "META-INF/MANIFEST.MF", Component.client)
+		clientmanifest.addMarker("exportpackages", 10, 0)
+		clientmanifest.addMarker("previousexportpackage", 9, 0)
+		
+		/// SERVER ///
 		var servermanifest = createFile(Identifier.ServerManifest, "META-INF/MANIFEST.MF", Component.server)
 		servermanifest.addMarker("exportpackages", 11, 0)
 		servermanifest.addMarker("previousexportpackage", 10, 0)
 		servermanifest.addMarker("laststatement", 22, 0)
 		var serverplugin = createFile(Identifier.ServerPlugin, "plugin.xml", Component.server)
 		serverplugin.addMarker("extensionservice", 27, 0)
+		
+		/// SHARED ///
+		var sharedmanifest = createFile(Identifier.SharedManifest, "META-INF/MANIFEST.MF", Component.shared)
+		sharedmanifest.addMarker("exportpackages", 10, 0)
+		sharedmanifest.addMarker("previousexportpackage", 9, 0)
+		var texts = createFile(Identifier.Texts, "resources/texts/Texts.properties", Component.shared)
+		texts.addMarker("content", 3, 0)
 	}
 	
 	def parseMetadata(Resource resource){
@@ -85,6 +108,13 @@ class CrudmlGenerator implements IGenerator {
 				case entry.type == "author" : author = entry.value
 				case entry.type == "workspace" : workspaceFolder = entry.value
 			}
+		}
+	}
+	
+	def static createStringEntry(String string, ExtendedFileSystemAccess fsa){
+		if (!registeredStrings.contains(string)){
+			registeredStrings.add(string)
+			fsa.modifyLines(Files.get(Identifier.Texts), "content", string.toFirstUpper + "=" + string)
 		}
 	}
 
