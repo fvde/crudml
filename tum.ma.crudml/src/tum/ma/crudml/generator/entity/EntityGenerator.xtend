@@ -51,7 +51,7 @@ import «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages.«e.
 '''
 
 			// finally create actual page (e.name.toFirstUpper + Identifier.TablePage)
-			fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePage, e.name.toFirstUpper,  "src/" + CrudmlGenerator.applicationName + "/client/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePage.java", Component.client),
+			val tablePage = fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePage, e.name.toFirstUpper,  "src/" + CrudmlGenerator.applicationName + "/client/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePage.java", Component.client),
 '''
 /**
  * 
@@ -84,7 +84,7 @@ public class «e.name.toFirstUpper»TablePage extends AbstractPageWithTable<Tabl
 ''')
 
 			// additionally create shared page data
-			fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePageData, e.name.toFirstUpper, "src/" + CrudmlGenerator.applicationName + "/shared/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePageData.java", Component.shared),
+			val tablePageData = fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePageData, e.name.toFirstUpper, "src/" + CrudmlGenerator.applicationName + "/shared/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePageData.java", Component.shared),
 '''
 /**
  * 
@@ -155,6 +155,12 @@ public class «e.name.toFirstUpper»TablePageData extends AbstractTablePageData 
 ''')
 			// string entry for page
 			CrudmlGenerator.createStringEntry(e.name.toFirstUpper, fsa)
+			
+			// Create some markers
+			tablePage.addMarker(Identifier.TableContent, e.name.toFirstUpper, 27)
+			tablePage.addMarker(Identifier.Imports, e.name.toFirstUpper, 13)
+			tablePageData.addMarker(Identifier.TableRowData, e.name.toFirstUpper, 65)
+			tablePageData.addMarker(Identifier.Members, e.name.toFirstUpper, 62)
 		}
 		
 		

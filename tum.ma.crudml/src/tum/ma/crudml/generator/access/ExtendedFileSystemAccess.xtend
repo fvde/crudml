@@ -36,6 +36,7 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 	
 	def generateFile(ExtendedFile file, String outputConfigurationName, CharSequence contents) {
 		fileSystemAccess.generateFile(file.path, outputConfigurationName, contents)
+		return file;
 	}
 	
 	def generateFile(ExtendedFile file, InputStream content) throws RuntimeIOException {

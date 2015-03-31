@@ -24,6 +24,7 @@ import tum.ma.crudml.generator.general.MetadataGenerator
 import tum.ma.crudml.generator.access.FileType
 import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.generator.general.MarkerGenerator
+import tum.ma.crudml.generator.entity.AttributeGenerator
 
 /**
  * Generates code from your model files on save.
@@ -57,12 +58,14 @@ class CrudmlGenerator implements IGenerator {
 		parseMetadata(resource)
 		
 		// Register generators. Numbers indicate priority, lower gets executed first
+		// EXECUTION ORDER MATTERS, ONLY CHANGE OF YOU KNOW WHAT YOU'RE DOING
 		generators = Arrays.asList(
 			new ScoutProjectGenerator(0),
 			new MarkerGenerator(1),
 			new MetadataGenerator(5),
 			new ServerSqlServiceGenerator(5),
-			new EntityGenerator(5)
+			new EntityGenerator(5),
+			new AttributeGenerator(10)
 		).sortBy[BaseGenerator x | x.priority]
 		
 		// Generate one time components

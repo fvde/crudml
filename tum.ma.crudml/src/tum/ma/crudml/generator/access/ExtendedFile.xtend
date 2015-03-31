@@ -55,7 +55,7 @@ import org.eclipse.xtend.lib.annotations.Accessors
 	
 	def insertLines(int numberOfLines, int atLine){
 		for (FileMarker marker : markers.values){
-			if (marker.line > atLine){
+			if (marker.line >= atLine){
 				marker.line = marker.line + numberOfLines
 			}
 		}

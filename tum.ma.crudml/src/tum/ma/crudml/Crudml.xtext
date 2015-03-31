@@ -45,7 +45,7 @@ Entity:
   (annotations += Annotation)*	
   'entity' name = ID             
   '{'
-    (attributes += Attribut)*
+    (attributes += Attribute)*
   '}'
 ;
 
@@ -59,12 +59,12 @@ UiLevel:
 ;
 
 /* Attribute block */
-Attribut:
-	Reference | Variable
+Attribute:
+	Reference | Member
 ;
 
-Variable:
-	name = ID ':' (type = [Entity | QualifiedName] | primitive = ('string' | 'int' | 'boolean' | 'long'))
+Member:
+	name = ID ':' (type = [Entity | QualifiedName] | primitive = ('string' | 'int' | 'boolean' | 'long' | 'double'))
 ;
 
 Reference:
