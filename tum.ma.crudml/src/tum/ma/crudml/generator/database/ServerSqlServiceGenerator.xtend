@@ -7,8 +7,13 @@ import tum.ma.crudml.generator.access.Component
 import tum.ma.crudml.generator.CrudmlGenerator
 import tum.ma.crudml.generator.access.FileType
 import tum.ma.crudml.generator.access.Identifier
+import tum.ma.crudml.generator.BaseGenerator
 
-class ServerSqlServiceGenerator implements IExtendedGenerator {
+class ServerSqlServiceGenerator extends BaseGenerator {
+	
+	new(int priority) {
+		super(priority)
+	}
 	
 	override doGenerate(Resource input, ExtendedFileSystemAccess fsa) {
 

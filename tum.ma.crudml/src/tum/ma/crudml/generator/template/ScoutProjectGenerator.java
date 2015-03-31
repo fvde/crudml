@@ -9,11 +9,15 @@ import org.eclipselabs.scwork.template.ProjectType;
 import org.eclipselabs.scwork.template.TemplateUtility;
 import org.eclipselabs.scwork.template.generator.IFileGenerator;
 
+import tum.ma.crudml.generator.BaseGenerator;
 import tum.ma.crudml.generator.CrudmlGenerator;
-import tum.ma.crudml.generator.IExtendedGenerator;
 import tum.ma.crudml.generator.access.ExtendedFileSystemAccess;
 
-public class ScoutProjectGenerator implements IExtendedGenerator{
+public class ScoutProjectGenerator extends BaseGenerator{
+
+	public ScoutProjectGenerator(int priority) {
+		super(priority);
+	}
 
 	@Override
 	public void doGenerate(Resource input, ExtendedFileSystemAccess fsa) {

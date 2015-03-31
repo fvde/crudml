@@ -6,8 +6,13 @@ import tum.ma.crudml.generator.access.ExtendedFileSystemAccess
 import tum.ma.crudml.generator.CrudmlGenerator
 import tum.ma.crudml.generator.access.FileType
 import tum.ma.crudml.generator.access.Identifier
+import tum.ma.crudml.generator.BaseGenerator
 
-class MetadataGenerator implements IExtendedGenerator{
+class MetadataGenerator extends BaseGenerator{
+	
+	new(int priority) {
+		super(priority)
+	}
 	
 	override doGenerate(Resource input, ExtendedFileSystemAccess fsa) {
 		// application name

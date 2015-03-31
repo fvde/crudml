@@ -23,6 +23,7 @@ import tum.ma.crudml.generator.entity.EntityGenerator
 import tum.ma.crudml.generator.general.MetadataGenerator
 import tum.ma.crudml.generator.access.FileType
 import tum.ma.crudml.generator.access.Identifier
+import tum.ma.crudml.generator.general.MarkerGenerator
 
 /**
  * Generates code from your model files on save.
@@ -41,7 +42,7 @@ class CrudmlGenerator implements IGenerator {
 	
 	// Some local variables
 	private static Map<String, ExtendedFile> Files = new HashMap<String, ExtendedFile>()
-	private List<IExtendedGenerator> oneTimeGenerators;
+	private List<BaseGenerator> generators;
 	private static List<String> registeredStrings;
 	
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
@@ -51,54 +52,23 @@ class CrudmlGenerator implements IGenerator {
 		
 		// reset strings
 		registeredStrings = new ArrayList<String>();
-		
-		// Create template
-		var templateGenerator = new ScoutProjectGenerator()
-		templateGenerator.doGenerate(resource, efsa)
-		
-		// Create extended files and markers
-		registerMarkers()
-		
+				
 		// Parse metadata
 		parseMetadata(resource)
 		
-		// Register onetime generators
-		oneTimeGenerators = Arrays.asList(
-			new MetadataGenerator,
-			new ServerSqlServiceGenerator,
-			new EntityGenerator
-		)
+		// Register generators. Numbers indicate priority, lower gets executed first
+		generators = Arrays.asList(
+			new ScoutProjectGenerator(0),
+			new MarkerGenerator(1),
+			new MetadataGenerator(5),
+			new ServerSqlServiceGenerator(5),
+			new EntityGenerator(5)
+		).sortBy[BaseGenerator x | x.priority]
 		
 		// Generate one time components
-		for (IExtendedGenerator generator : oneTimeGenerators){
+		for (BaseGenerator generator : generators){
 			generator.doGenerate(resource, efsa)
 		}
-	}
-	
-	def registerMarkers(){
-		/// CLIENT ///
-		var standardOutline = createFile(FileType.StandardOutline, "src/" + applicationName + "/client/ui/desktop/outlines/StandardOutline.java", Component.client)
-		standardOutline.addMarker(Identifier.Title, 20, 1)
-		standardOutline.addMarker(Identifier.Imports, 9, 0)
-		standardOutline.addMarker(Identifier.Content, 21, 0)
-		var clientmanifest = createFile(FileType.ClientManifest, "META-INF/MANIFEST.MF", Component.client)
-		clientmanifest.addMarker(Identifier.ExportPackages, 10, 0)
-		clientmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0)
-		
-		/// SERVER ///
-		var servermanifest = createFile(FileType.ServerManifest, "META-INF/MANIFEST.MF", Component.server)
-		servermanifest.addMarker(Identifier.ExportPackages, 11, 0)
-		servermanifest.addMarker(Identifier.PreviousExportPackage, 10, 0)
-		servermanifest.addMarker(Identifier.LastStatement, 22, 0)
-		var serverplugin = createFile(FileType.ServerPlugin, "plugin.xml", Component.server)
-		serverplugin.addMarker(Identifier.ExtensionService, 27, 0)
-		
-		/// SHARED ///
-		var sharedmanifest = createFile(FileType.SharedManifest, "META-INF/MANIFEST.MF", Component.shared)
-		sharedmanifest.addMarker(Identifier.ExportPackages, 10, 0)
-		sharedmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0)
-		var texts = createFile(FileType.Texts, "resources/texts/Texts.properties", Component.shared)
-		texts.addMarker(Identifier.Content, 3, 0)
 	}
 	
 	def parseMetadata(Resource resource){
@@ -145,10 +115,7 @@ class CrudmlGenerator implements IGenerator {
 	private def static getFile(String ident){
 		return Files.get(ident)
 	}
-			
-	/**
-	* Creates something like "Workspacefolder/applicationname.component/"
-	**/	
+
 	def static prefix(Component comp){
 		return workspaceFolder + "/" + applicationName + "."+ comp.toString + "/"
 	}
