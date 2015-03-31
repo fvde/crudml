@@ -90,8 +90,13 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 		file.insertLines(newLines.length, atLine)
 	}
 	
-	def modifyLines(ExtendedFile file, String identifier, String modification){
-		val marker = file.getMarker(identifier)
+		
+	def modifyLines(ExtendedFile file, Identifier identifier, String modification){
+		modifyLines(file, identifier, "", modification)
+	}
+	
+	def modifyLines(ExtendedFile file, Identifier identifier, String name, String modification){
+		val marker = file.getMarker(identifier, name)
 		
 		if (marker == null){
 			throw new Exception("Specified marker not found!")
@@ -108,8 +113,12 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 		}
 	}
 	
-	def addToLine(ExtendedFile file, String identifier, String addition){	
-		val marker = file.getMarker(identifier)
+	def addToLine(ExtendedFile file, Identifier identifier, String addition){
+		addToLine(file, identifier, "", addition)
+	}
+	
+	def addToLine(ExtendedFile file, Identifier identifier, String name, String addition){	
+		val marker = file.getMarker(identifier, name)
 		
 		if (marker != null && marker.size == 0){
 			val contents = readTextFile(file)

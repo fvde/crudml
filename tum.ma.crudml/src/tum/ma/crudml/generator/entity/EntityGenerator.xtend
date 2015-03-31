@@ -4,9 +4,10 @@ import tum.ma.crudml.generator.IExtendedGenerator
 import org.eclipse.emf.ecore.resource.Resource
 import tum.ma.crudml.generator.access.ExtendedFileSystemAccess
 import tum.ma.crudml.crudml.Entity
-import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.generator.CrudmlGenerator
 import tum.ma.crudml.generator.access.Component
+import tum.ma.crudml.generator.access.FileType
+import tum.ma.crudml.generator.access.Identifier
 
 class EntityGenerator implements IExtendedGenerator {
 	
@@ -24,12 +25,12 @@ class EntityGenerator implements IExtendedGenerator {
 			// register packages
 			if (!pagePackageRegistered){
 				// client
-				fsa.addToLine(CrudmlGenerator.Files.get(Identifier.ClientManifest), "previousexportpackage", ",")
-				fsa.modifyLines(CrudmlGenerator.Files.get(Identifier.ClientManifest), "exportpackages",''' «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages''') 
+				fsa.addToLine(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.PreviousExportPackage, ",")
+				fsa.modifyLines(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages''') 
 				
 				// shared
-				fsa.addToLine(CrudmlGenerator.Files.get(Identifier.SharedManifest), "previousexportpackage", ",")
-				fsa.modifyLines(CrudmlGenerator.Files.get(Identifier.SharedManifest), "exportpackages",''' «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages''') 
+				fsa.addToLine(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.PreviousExportPackage, ",")
+				fsa.modifyLines(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages''') 
 				pagePackageRegistered = true;	
 			}
 			
@@ -45,7 +46,7 @@ import «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages.«e.
 '''
 
 			// finally create actual page (e.name.toFirstUpper + Identifier.TablePage)
-			fsa.generateFile(CrudmlGenerator.createFile(Identifier.Custom, "src/" + CrudmlGenerator.applicationName + "/client/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePage.java", Component.client),
+			fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePage, e.name.toFirstUpper,  "src/" + CrudmlGenerator.applicationName + "/client/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePage.java", Component.client),
 '''
 /**
  * 
@@ -78,7 +79,7 @@ public class «e.name.toFirstUpper»TablePage extends AbstractPageWithTable<Tabl
 ''')
 
 			// additionally create shared page data
-			fsa.generateFile(CrudmlGenerator.createFile(Identifier.Custom, "src/" + CrudmlGenerator.applicationName + "/shared/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePageData.java", Component.shared),
+			fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePageData, e.name.toFirstUpper, "src/" + CrudmlGenerator.applicationName + "/shared/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePageData.java", Component.shared),
 '''
 /**
  * 
@@ -154,7 +155,7 @@ public class «e.name.toFirstUpper»TablePageData extends AbstractTablePageData 
 		
 		if (!registeredEntities.isNullOrEmpty){
 			// reference entities in outline
-			fsa.modifyLines(CrudmlGenerator.Files.get(Identifier.StandardOutline), "imports",
+			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutline), Identifier.Imports,
 '''	
 import org.eclipse.scout.commons.exception.ProcessingException;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
@@ -162,7 +163,7 @@ import java.util.List;
 «registeredEntityImports»
 ''')
 
-			fsa.modifyLines(CrudmlGenerator.Files.get(Identifier.StandardOutline), "content",
+			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutline), Identifier.Content,
 '''	
 
 	@Override

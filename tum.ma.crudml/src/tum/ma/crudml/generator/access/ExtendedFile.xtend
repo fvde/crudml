@@ -9,7 +9,7 @@ import org.eclipse.xtend.lib.annotations.Accessors
 	
 	String name
 	String path
-	Map<String, FileMarker> markers
+	private Map<String, FileMarker> markers
 	
 	new(File file){
 		this(file.path, file.name)
@@ -21,20 +21,36 @@ import org.eclipse.xtend.lib.annotations.Accessors
 		markers = new HashMap<String, FileMarker>
 	}
 	
-	def addMarker(String identifier, int line){
-		markers.put(identifier, new FileMarker(line, 0))
+	def addMarker(Identifier identifier, int line){
+		addMarker(identifier.toString, new FileMarker(line, 0))
 	}
 	
-	def addMarker(String identifier, int line, int size){
-		markers.put(identifier, new FileMarker(line, size))
+	def addMarker(Identifier identifier, int line, int size){
+		addMarker(identifier.toString, new FileMarker(line, size))
 	}
 	
-	def addMarker(String identifier, FileMarker marker){
+	def addMarker(Identifier identifier, String name, int line){
+		addMarker(identifier.toString + name, new FileMarker(line, 0))
+	}
+	
+	def addMarker(Identifier identifier, String name, int line, int size){
+		addMarker(identifier.toString + name, new FileMarker(line, size))
+	}
+	
+	private def addMarker(String identifier, FileMarker marker){
 		markers.put(identifier, marker)
 	}
 	
-	def getMarker(String identifier){
-		markers.get(identifier)
+	def getMarker(Identifier identifier, String name){
+		return getMarker(identifier.toString + name)
+	}
+	
+	def getMarker(Identifier identifier){
+		return getMarker(identifier.toString)
+	}
+	
+	private def getMarker(String ident){
+		return markers.get(ident)
 	}
 	
 	def insertLines(int numberOfLines, int atLine){

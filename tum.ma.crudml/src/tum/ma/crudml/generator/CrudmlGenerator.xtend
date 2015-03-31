@@ -9,7 +9,6 @@ import org.eclipse.xtext.generator.IGenerator
 import tum.ma.crudml.crudml.Entity
 import tum.ma.crudml.generator.access.ExtendedFile
 import tum.ma.crudml.generator.access.ExtendedFileSystemAccess
-import tum.ma.crudml.generator.access.Identifier
 import java.util.Map
 import java.util.HashMap
 import tum.ma.crudml.generator.access.Component
@@ -22,6 +21,8 @@ import tum.ma.crudml.crudml.Metadata
 import tum.ma.crudml.crudml.MetadataEntry
 import tum.ma.crudml.generator.entity.EntityGenerator
 import tum.ma.crudml.generator.general.MetadataGenerator
+import tum.ma.crudml.generator.access.FileType
+import tum.ma.crudml.generator.access.Identifier
 
 /**
  * Generates code from your model files on save.
@@ -39,7 +40,7 @@ class CrudmlGenerator implements IGenerator {
 	public static String dbPassword = "minicrm"
 	
 	// Some local variables
-	public static Map<Identifier, ExtendedFile> Files = new HashMap<Identifier, ExtendedFile>()
+	private static Map<String, ExtendedFile> Files = new HashMap<String, ExtendedFile>()
 	private List<IExtendedGenerator> oneTimeGenerators;
 	private static List<String> registeredStrings;
 	
@@ -76,28 +77,28 @@ class CrudmlGenerator implements IGenerator {
 	
 	def registerMarkers(){
 		/// CLIENT ///
-		var standardOutline = createFile(Identifier.StandardOutline, "src/" + applicationName + "/client/ui/desktop/outlines/StandardOutline.java", Component.client)
-		standardOutline.addMarker("title", 20, 1)
-		standardOutline.addMarker("imports", 9, 0)
-		standardOutline.addMarker("content", 21, 0)
-		var clientmanifest = createFile(Identifier.ClientManifest, "META-INF/MANIFEST.MF", Component.client)
-		clientmanifest.addMarker("exportpackages", 10, 0)
-		clientmanifest.addMarker("previousexportpackage", 9, 0)
+		var standardOutline = createFile(FileType.StandardOutline, "src/" + applicationName + "/client/ui/desktop/outlines/StandardOutline.java", Component.client)
+		standardOutline.addMarker(Identifier.Title, 20, 1)
+		standardOutline.addMarker(Identifier.Imports, 9, 0)
+		standardOutline.addMarker(Identifier.Content, 21, 0)
+		var clientmanifest = createFile(FileType.ClientManifest, "META-INF/MANIFEST.MF", Component.client)
+		clientmanifest.addMarker(Identifier.ExportPackages, 10, 0)
+		clientmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0)
 		
 		/// SERVER ///
-		var servermanifest = createFile(Identifier.ServerManifest, "META-INF/MANIFEST.MF", Component.server)
-		servermanifest.addMarker("exportpackages", 11, 0)
-		servermanifest.addMarker("previousexportpackage", 10, 0)
-		servermanifest.addMarker("laststatement", 22, 0)
-		var serverplugin = createFile(Identifier.ServerPlugin, "plugin.xml", Component.server)
-		serverplugin.addMarker("extensionservice", 27, 0)
+		var servermanifest = createFile(FileType.ServerManifest, "META-INF/MANIFEST.MF", Component.server)
+		servermanifest.addMarker(Identifier.ExportPackages, 11, 0)
+		servermanifest.addMarker(Identifier.PreviousExportPackage, 10, 0)
+		servermanifest.addMarker(Identifier.LastStatement, 22, 0)
+		var serverplugin = createFile(FileType.ServerPlugin, "plugin.xml", Component.server)
+		serverplugin.addMarker(Identifier.ExtensionService, 27, 0)
 		
 		/// SHARED ///
-		var sharedmanifest = createFile(Identifier.SharedManifest, "META-INF/MANIFEST.MF", Component.shared)
-		sharedmanifest.addMarker("exportpackages", 10, 0)
-		sharedmanifest.addMarker("previousexportpackage", 9, 0)
-		var texts = createFile(Identifier.Texts, "resources/texts/Texts.properties", Component.shared)
-		texts.addMarker("content", 3, 0)
+		var sharedmanifest = createFile(FileType.SharedManifest, "META-INF/MANIFEST.MF", Component.shared)
+		sharedmanifest.addMarker(Identifier.ExportPackages, 10, 0)
+		sharedmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0)
+		var texts = createFile(FileType.Texts, "resources/texts/Texts.properties", Component.shared)
+		texts.addMarker(Identifier.Content, 3, 0)
 	}
 	
 	def parseMetadata(Resource resource){
@@ -114,15 +115,35 @@ class CrudmlGenerator implements IGenerator {
 	def static createStringEntry(String string, ExtendedFileSystemAccess fsa){
 		if (!registeredStrings.contains(string)){
 			registeredStrings.add(string)
-			fsa.modifyLines(Files.get(Identifier.Texts), "content", string.toFirstUpper + "=" + string)
+			fsa.modifyLines(getFile(FileType.Texts), Identifier.Content, string.toFirstUpper + "=" + string)
 		}
 	}
 
-	def static createFile(Identifier ident, String path, Component comp){
+	def static createFile(FileType ident, String path, Component comp){
+		return createFile(ident.toString, path, comp)
+	}
+	
+	def static createFile(FileType ident, String name, String path, Component comp){
+		return createFile(ident.toString + name, path, comp)
+	}
+	
+	private def static createFile(String custom, String path, Component comp){
 		var name = path.split("/").last
 		var file = new ExtendedFile(prefix(comp) + path, name)
-		Files.put(ident, file)
+		Files.put(custom, file)
 		return file
+	}
+	
+	def static getFile(FileType ident){
+		return getFile(ident.toString)
+	}
+	
+	def static getFile(FileType ident, String name){
+		return getFile(ident.toString + name)
+	}
+	
+	private def static getFile(String ident){
+		return Files.get(ident)
 	}
 			
 	/**
