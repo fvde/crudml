@@ -1,6 +1,8 @@
 package tum.ma.crudml.generator.utilities
 
 import java.util.ArrayList
+import tum.ma.crudml.generator.access.FileMarker
+import tum.ma.crudml.generator.access.Identifier
 
 class GeneratorUtilities {
 	def static getStringFromArray(Iterable<String> iterable){
@@ -36,5 +38,21 @@ class GeneratorUtilities {
 		}
 		
 		return result
+	}
+	
+	def static createMarker(Identifier ident){
+		createMarker(ident.toString, 0)
+	}
+	
+	def static createMarker(Identifier ident, int size){
+		createMarker(ident.toString, size)
+	}
+	
+	def static createMarker(Identifier ident, String name){
+		createMarker(ident.toString + name, 0)
+	}
+	
+	def private static createMarker(String identifier, int size){
+		return FileMarker.markerTag + identifier + FileMarker.markerAttributeTag + size + FileMarker.markerTag
 	}
 }

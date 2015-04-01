@@ -89,6 +89,7 @@ class AttributeGenerator extends BaseGenerator{
 		} else {
 			tableProperties = 
 '''
+
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("«tableHeader»");
@@ -109,14 +110,13 @@ class AttributeGenerator extends BaseGenerator{
 
     @Order(«memberPosition.toString».0)
     public class «name»Column extends Abstract«tableType»Column {
-
 «tableProperties»
+    }
 ''')
 		// imports
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.TablePage, entityName), Identifier.Imports, entityName,
 '''	
 import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»Column;
-import «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages.«entityName»TablePage.Table.«name»Column;
 ''')
 		// add member to table page data
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.TablePageData, entityName), Identifier.Members, entityName,

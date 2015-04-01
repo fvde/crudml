@@ -41,8 +41,8 @@ public class ScoutProjectGenerator extends BaseGenerator{
 		param.setClientIncluded(true);
 		param.setServerIncluded(true);
 		param.setSharedIncluded(true);
-		param.setUirapIncluded(true);
-		param.setUiswtIncluded(true);
+		param.setUirapIncluded(false);
+		param.setUiswtIncluded(false);
 		param.setUiswingIncluded(true);
 
 		// Type of application:

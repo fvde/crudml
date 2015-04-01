@@ -9,7 +9,6 @@ import org.eclipse.xtend.lib.annotations.Accessors
 	
 	String name
 	String path
-	private Map<String, FileMarker> markers
 	
 	new(File file){
 		this(file.path, file.name)
@@ -18,46 +17,31 @@ import org.eclipse.xtend.lib.annotations.Accessors
 	new(String path, String name){
 		this.path = path
 		this.name = name
-		markers = new HashMap<String, FileMarker>
 	}
 	
-	def addMarker(Identifier identifier, int line){
-		addMarker(identifier.toString, new FileMarker(line, 0))
+	/*
+	 * Only use for adding markers to template code!
+	 */
+	def addMarker(Identifier identifier, int atLine, int size, ExtendedFileSystemAccess fsa){
+		fsa.addMarker(this, identifier, atLine, size)
 	}
 	
-	def addMarker(Identifier identifier, int line, int size){
-		addMarker(identifier.toString, new FileMarker(line, size))
+	def FileMarker getMarker(Identifier identifier, String name, ExtendedFileSystemAccess fsa){
+		return getMarker(identifier.toString + name, fsa)
 	}
 	
-	def addMarker(Identifier identifier, String name, int line){
-		addMarker(identifier.toString + name, new FileMarker(line, 0))
+	def getMarker(Identifier identifier, ExtendedFileSystemAccess fsa){
+		return getMarker(identifier.toString, fsa)
 	}
 	
-	def addMarker(Identifier identifier, String name, int line, int size){
-		addMarker(identifier.toString + name, new FileMarker(line, size))
-	}
-	
-	private def addMarker(String identifier, FileMarker marker){
-		markers.put(identifier, marker)
-	}
-	
-	def getMarker(Identifier identifier, String name){
-		return getMarker(identifier.toString + name)
-	}
-	
-	def getMarker(Identifier identifier){
-		return getMarker(identifier.toString)
-	}
-	
-	private def getMarker(String ident){
-		return markers.get(ident)
-	}
-	
-	def insertLines(int numberOfLines, int atLine){
-		for (FileMarker marker : markers.values){
-			if (marker.line >= atLine){
-				marker.line = marker.line + numberOfLines
-			}
+	private def getMarker(String ident, ExtendedFileSystemAccess fsa){
+		val markers = fsa.getMarkers(this)
+		val marker = markers.findFirst[x | x.identifier == ident]
+		
+		if (markers.length == 0 || marker == null){
+			throw new Exception("Specified marker not found!")
 		}
+		
+		return marker;
 	}
 }

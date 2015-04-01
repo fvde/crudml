@@ -5,6 +5,7 @@ enum Identifier {
 	Title,
 	TableContent,
 	TableRowData,
+	SqlStatementGetTableData,
 	Imports,
 	Members,
 	LastStatement,

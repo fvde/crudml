@@ -18,27 +18,24 @@ class MarkerGenerator extends BaseGenerator {
 		
 		/// CLIENT ///
 		var standardOutline = CrudmlGenerator.createFile(FileType.StandardOutline, "src/" + CrudmlGenerator.applicationName + "/client/ui/desktop/outlines/StandardOutline.java", Component.client)
-		standardOutline.addMarker(Identifier.Title, 20, 1)
-		standardOutline.addMarker(Identifier.Imports, 9, 0)
-		standardOutline.addMarker(Identifier.Content, 21, 0)
+
 		var clientmanifest = CrudmlGenerator.createFile(FileType.ClientManifest, "META-INF/MANIFEST.MF", Component.client)
-		clientmanifest.addMarker(Identifier.ExportPackages, 10, 0)
-		clientmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0)
+		clientmanifest.addMarker(Identifier.ExportPackages, 10, 0, fsa)
+		clientmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0, fsa)
 		
 		/// SERVER ///
 		var servermanifest = CrudmlGenerator.createFile(FileType.ServerManifest, "META-INF/MANIFEST.MF", Component.server)
-		servermanifest.addMarker(Identifier.ExportPackages, 11, 0)
-		servermanifest.addMarker(Identifier.PreviousExportPackage, 10, 0)
-		servermanifest.addMarker(Identifier.LastStatement, 22, 0)
+		servermanifest.addMarker(Identifier.ExportPackages, 11, 0, fsa)
+		servermanifest.addMarker(Identifier.PreviousExportPackage, 10, 0, fsa)
 		var serverplugin = CrudmlGenerator.createFile(FileType.ServerPlugin, "plugin.xml", Component.server)
-		serverplugin.addMarker(Identifier.ExtensionService, 27, 0)
+		serverplugin.addMarker(Identifier.ExtensionService, 27, 0, fsa)
 		
 		/// SHARED ///
 		var sharedmanifest = CrudmlGenerator.createFile(FileType.SharedManifest, "META-INF/MANIFEST.MF", Component.shared)
-		sharedmanifest.addMarker(Identifier.ExportPackages, 10, 0)
-		sharedmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0)
+		sharedmanifest.addMarker(Identifier.ExportPackages, 10, 0, fsa)
+		sharedmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0, fsa)
 		var texts = CrudmlGenerator.createFile(FileType.Texts, "resources/texts/Texts.properties", Component.shared)
-		texts.addMarker(Identifier.Content, 3, 0)
+		texts.addMarker(Identifier.Content, 3, 0, fsa)
 	}
 	
 }

@@ -7,15 +7,12 @@ import org.eclipse.xtext.generator.IFileSystemAccessExtension
 import org.eclipse.xtext.generator.IFileSystemAccessExtension3
 import org.eclipse.xtext.util.RuntimeIOException
 import tum.ma.crudml.generator.utilities.GeneratorUtilities
+import java.util.ArrayList
 
 @Accessors class ExtendedFileSystemAccess {
 	
 	private IFileSystemAccess fileSystemAccess
 	private String outputConfigurationName = IFileSystemAccess.DEFAULT_OUTPUT
-	
-	new(){
-		// Make sure to set fileSystemAccess manually!
-	}
 	
 	new(IFileSystemAccess access) {
 		fileSystemAccess = access
@@ -73,9 +70,6 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 		
 		// Update file
 		generateFile(file, GeneratorUtilities.getStringFromArray(result))
-		
-		// Update markers
-		file.insertLines(to - from - 1, from)
 	}
 	
 	def private insertLines(ExtendedFile file, String lines, int atLine){
@@ -86,9 +80,6 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 		
 		// Update file
 		generateFile(file, GeneratorUtilities.getStringFromArray(result))
-		
-		// Update markers
-		file.insertLines(newLines.length, atLine)
 	}
 	
 		
@@ -97,7 +88,7 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 	}
 	
 	def modifyLines(ExtendedFile file, Identifier identifier, String name, String modification){
-		val marker = file.getMarker(identifier, name)
+		val marker = file.getMarker(identifier, name, this)
 		
 		if (marker == null){
 			throw new Exception("Specified marker not found!")
@@ -114,20 +105,85 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 		}
 	}
 	
-	def addToLine(ExtendedFile file, Identifier identifier, String addition){
-		addToLine(file, identifier, "", addition)
+	def addToLineStart(ExtendedFile file, Identifier identifier, String addition){
+		addToLine(file, identifier, "", addition, true)
 	}
 	
-	def addToLine(ExtendedFile file, Identifier identifier, String name, String addition){	
-		val marker = file.getMarker(identifier, name)
+	def addToLineEnd(ExtendedFile file, Identifier identifier, String addition){
+		addToLine(file, identifier, "", addition, false)
+	}
+	
+	private def addToLine(ExtendedFile file, Identifier identifier, String name, String addition, boolean atTheBeginning){	
+		val marker = file.getMarker(identifier, name, this)
 		
 		if (marker != null && marker.size == 0){
-			val contents = readTextFile(file)
-			var lines = contents.toString.split(System.getProperty("line.separator")).toList
+			addToLine(file, marker, addition, atTheBeginning)
+		}
+	}
+	
+	private def addToLine(ExtendedFile file, FileMarker marker, String addition, boolean atTheBeginning){	
+		val contents = readTextFile(file)
+		var lines = contents.toString.split(System.getProperty("line.separator")).toList
+		
+		if (atTheBeginning){
+			lines.set(marker.line - 1, addition + lines.get(marker.line - 1))
+		} else {
 			lines.set(marker.line - 1, lines.get(marker.line - 1) + addition)
-			
+		}
+		
+		// Update file (No markers have changed!)
+		generateFile(file, GeneratorUtilities.getStringFromArray(lines))
+	}
+	
+	def addMarker(ExtendedFile file, Identifier identifier, int atLine, int size){
+		addToLine(
+			file, 
+			new FileMarker(identifier.toString, atLine, size), 
+			GeneratorUtilities.createMarker(identifier, size),
+			true
+		)
+	}
+	
+	def getMarkers(ExtendedFile file){
+		val lines = readTextFile(file).toString.split(System.getProperty("line.separator")).toList
+		var markers = new ArrayList<FileMarker>()
+		
+		for (var line = 0; line < lines.length; line++){
+			val tmp = lines.get(line).split(FileMarker.markerTag)
+			if (tmp.length >= 2){
+				// Note the + 1! This is to because most line annotation will start with 1 instead of zero
+				markers.add(parseMarker(tmp.get(1), line + 1))
+			}
+		}
+		
+		return markers		
+	}
+	
+	def removeMarkers(ExtendedFile file){
+		var lines = readTextFile(file).toString.split(System.getProperty("line.separator")).toList
+		var lineModified = false
+		
+		for (var line = 0; line < lines.length; line++){
+			val tmp = lines.get(line).split(FileMarker.markerTag)
+			if (tmp.length == 3){
+				// last element in array contains actual line content
+				lines.set(line, tmp.get(tmp.length - 1))
+				lineModified = true;
+			} else if (tmp.length == 2){
+				// line was empty (i.e. import marker)
+				lines.set(line, "")
+				lineModified = true;
+			}
+		}
+		
+		if (lineModified){
 			// Update file (No markers have changed!)
 			generateFile(file, GeneratorUtilities.getStringFromArray(lines))
 		}
+	}
+	
+	private def parseMarker(String s, int atLine){
+		val tmp = s.split(FileMarker.markerAttributeTag)
+		return new FileMarker(tmp.get(FileMarker.markerNameIndex), atLine, Integer.parseInt(tmp.get(FileMarker.markerSizeIndex)))
 	}
 }

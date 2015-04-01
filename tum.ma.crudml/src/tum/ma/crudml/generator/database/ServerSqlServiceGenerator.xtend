@@ -18,8 +18,7 @@ class ServerSqlServiceGenerator extends BaseGenerator {
 	override doGenerate(Resource input, ExtendedFileSystemAccess fsa) {
 
 		// create reference to export package
-		fsa.addToLine(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.PreviousExportPackage, ",")
-		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.LastStatement, "Delete: thisline")
+		fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.PreviousExportPackage, ",")
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».server.services.common.sql''') 
 		
 		// create reference to service

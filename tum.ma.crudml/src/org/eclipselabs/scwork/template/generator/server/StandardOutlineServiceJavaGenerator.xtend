@@ -5,6 +5,8 @@ import org.eclipselabs.scwork.template.ProjectType
 import org.eclipselabs.scwork.template.generator.ITextFileGenerator
 
 import static extension org.eclipselabs.scwork.template.generator.common.GeneratorExtensions.*
+import tum.ma.crudml.generator.utilities.GeneratorUtilities
+import tum.ma.crudml.generator.access.Identifier
 
 class StandardOutlineServiceJavaGenerator implements ITextFileGenerator {
 	
@@ -24,11 +26,12 @@ package «param.serverProjectName».services;
 import org.eclipse.scout.service.AbstractService;
 
 import «param.sharedProjectName».services.IStandardOutlineService;
+«GeneratorUtilities.createMarker(Identifier.Imports)»
 
 /**
  * «param.authorName.box("@author ", "")»
  */
 public class StandardOutlineService extends AbstractService implements IStandardOutlineService {
-}
+«GeneratorUtilities.createMarker(Identifier.Content)»}
 '''
 }

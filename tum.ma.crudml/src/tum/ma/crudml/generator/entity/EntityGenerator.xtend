@@ -9,10 +9,11 @@ import tum.ma.crudml.generator.access.Component
 import tum.ma.crudml.generator.access.FileType
 import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.generator.BaseGenerator
+import tum.ma.crudml.generator.utilities.GeneratorUtilities
 
 class EntityGenerator extends BaseGenerator {
 	
-	private static var pagePackageRegistered = false
+	private static var oneTimeOperationsExecuted = false
 	
 	new(int priority) {
 		super(priority)
@@ -24,19 +25,19 @@ class EntityGenerator extends BaseGenerator {
 		val entries = input.allContents.toIterable.filter(Entity)
 		var registeredEntities = ""
 		var registeredEntityImports = ""
-		pagePackageRegistered = false;
+		oneTimeOperationsExecuted = false;
 		
 		for (Entity e : entries){
 			// register packages
-			if (!pagePackageRegistered){
+			if (!oneTimeOperationsExecuted){
 				// client
-				fsa.addToLine(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.PreviousExportPackage, ",")
+				fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.PreviousExportPackage, ",")
 				fsa.modifyLines(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages''') 
 				
 				// shared
-				fsa.addToLine(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.PreviousExportPackage, ",")
+				fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.PreviousExportPackage, ",")
 				fsa.modifyLines(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages''') 
-				pagePackageRegistered = true;	
+				oneTimeOperationsExecuted = true;	
 			}
 			
 			// registry string
@@ -50,8 +51,43 @@ class EntityGenerator extends BaseGenerator {
 import «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages.«e.name.toFirstUpper»TablePage;	
 '''
 
-			// finally create actual page (e.name.toFirstUpper + Identifier.TablePage)
-			val tablePage = fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePage, e.name.toFirstUpper,  "src/" + CrudmlGenerator.applicationName + "/client/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePage.java", Component.client),
+			// create actual page (e.name.toFirstUpper + Identifier.TablePage)
+			generateTablePage(e, fsa)
+			
+			// additionally create shared page data
+			generateTablePageData(e, fsa)
+			
+			// string entry for page
+			CrudmlGenerator.createStringEntry(e.name.toFirstUpper, fsa)
+			
+			// standardOutlineService
+			generateStandardOutlineService(e, fsa)
+		}
+		
+		
+		if (!registeredEntities.isNullOrEmpty){
+			// reference entities in outline
+			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutline), Identifier.Imports,
+'''	
+import org.eclipse.scout.commons.exception.ProcessingException;
+import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
+import java.util.List;
+«registeredEntityImports»
+''')
+
+			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutline), Identifier.Content,
+'''	
+
+	@Override
+	protected void execCreateChildPages(List<IPage> pageList) throws ProcessingException {
+	«registeredEntities»
+	}
+''')
+		}
+	}
+	
+	private def generateTablePage(Entity e, ExtendedFileSystemAccess fsa){
+		val tablePage = fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePage, e.name.toFirstUpper,  "src/" + CrudmlGenerator.applicationName + "/client/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePage.java", Component.client),
 '''
 /**
  * 
@@ -63,9 +99,13 @@ import org.eclipse.scout.commons.annotations.PageData;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.extension.client.ui.basic.table.AbstractExtensibleTable;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.commons.exception.ProcessingException;
+import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
+import org.eclipse.scout.service.SERVICES;
 import «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages.«e.name.toFirstUpper»TablePage.Table;
 import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.«e.name.toFirstUpper»TablePageData;
-
+import «CrudmlGenerator.applicationName».shared.services.IStandardOutlineService;
+«GeneratorUtilities.createMarker(Identifier.Imports, e.name.toFirstUpper)»
 /**
  * @author «CrudmlGenerator.author»
  */
@@ -76,15 +116,22 @@ public class «e.name.toFirstUpper»TablePage extends AbstractPageWithTable<Tabl
   protected String getConfiguredTitle() {
     return TEXTS.get("«e.name.toFirstUpper»");
   }
+  
+  @Override
+  protected void execLoadData(SearchFilter filter) throws ProcessingException {
+    importPageData(SERVICES.getService(IStandardOutlineService.class).get«e.name.toFirstUpper»TableData());
+  }
 
   @Order(10.0)
   public class Table extends AbstractExtensibleTable {
-  }
+«GeneratorUtilities.createMarker(Identifier.TableContent, e.name.toFirstUpper)»  }
 }
 ''')
-
-			// additionally create shared page data
-			val tablePageData = fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePageData, e.name.toFirstUpper, "src/" + CrudmlGenerator.applicationName + "/shared/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePageData.java", Component.shared),
+		
+	}	
+	
+	private def generateTablePageData(Entity e, ExtendedFileSystemAccess fsa){
+		val tablePageData = fsa.generateFile(CrudmlGenerator.createFile(FileType.TablePageData, e.name.toFirstUpper, "src/" + CrudmlGenerator.applicationName + "/shared/ui/desktop/outlines/pages/" + e.name.toFirstUpper + "TablePageData.java", Component.shared),
 '''
 /**
  * 
@@ -147,41 +194,53 @@ public class «e.name.toFirstUpper»TablePageData extends AbstractTablePageData 
   public static class «e.name.toFirstUpper»TableRowData extends AbstractTableRowData {
 
     private static final long serialVersionUID = 1L;
-
+«GeneratorUtilities.createMarker(Identifier.Members, e.name.toFirstUpper)»
     public «e.name.toFirstUpper»TableRowData() {
     }
-  }
+«GeneratorUtilities.createMarker(Identifier.TableRowData, e.name.toFirstUpper)»  }
 }
 ''')
-			// string entry for page
-			CrudmlGenerator.createStringEntry(e.name.toFirstUpper, fsa)
-			
-			// Create some markers
-			tablePage.addMarker(Identifier.TableContent, e.name.toFirstUpper, 27)
-			tablePage.addMarker(Identifier.Imports, e.name.toFirstUpper, 13)
-			tablePageData.addMarker(Identifier.TableRowData, e.name.toFirstUpper, 65)
-			tablePageData.addMarker(Identifier.Members, e.name.toFirstUpper, 62)
-		}
-		
-		
-		if (!registeredEntities.isNullOrEmpty){
-			// reference entities in outline
-			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutline), Identifier.Imports,
-'''	
-import org.eclipse.scout.commons.exception.ProcessingException;
-import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
-import java.util.List;
-«registeredEntityImports»
-''')
-
-			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutline), Identifier.Content,
-'''	
-
-	@Override
-	protected void execCreateChildPages(List<IPage> pageList) throws ProcessingException {
-	«registeredEntities»
 	}
-''')
-		}
-	}	
+	
+	private def generateStandardOutlineService(Entity e, ExtendedFileSystemAccess fsa){
+		// register in StandardOutlineService
+		val standardOutlineService = CrudmlGenerator.createFile(FileType.StandardOutlineService, "src/" + CrudmlGenerator.applicationName + "/server/services/StandardOutlineService.java", Component.server)
+		fsa.modifyLines(standardOutlineService, Identifier.Content,
+'''
+
+  @Override
+  public «e.name.toFirstUpper»TablePageData get«e.name.toFirstUpper»TableData() throws ProcessingException {
+    «e.name.toFirstUpper»TablePageData pageData = new «e.name.toFirstUpper»TablePageData();
+
+  «GeneratorUtilities.createMarker(Identifier.SqlStatementGetTableData, e.name.toFirstUpper)»
+
+    return pageData;
+  }
+''') 	
+
+		fsa.modifyLines(standardOutlineService, Identifier.Imports,
+'''
+import org.eclipse.scout.commons.exception.ProcessingException;
+import org.eclipse.scout.rt.server.services.common.jdbc.SQL;
+import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.«e.name.toFirstUpper»TablePageData;
+''') 
+
+		// register in IStandardOutlineService
+		val standardOutlineServiceInterface = CrudmlGenerator.createFile(FileType.IStandardOutlineService, "src/" + CrudmlGenerator.applicationName + "/shared/services/IStandardOutlineService.java", Component.shared)
+		fsa.modifyLines(standardOutlineServiceInterface, Identifier.Content,
+'''
+
+  /**
+   * @return
+   * @throws org.eclipse.scout.commons.exception.ProcessingException
+   */
+  «e.name.toFirstUpper»TablePageData get«e.name.toFirstUpper»TableData() throws ProcessingException;
+''') 
+
+		fsa.modifyLines(standardOutlineServiceInterface, Identifier.Imports,
+'''
+import org.eclipse.scout.commons.exception.ProcessingException;
+import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.«e.name.toFirstUpper»TablePageData;
+''') 
+	}
 }

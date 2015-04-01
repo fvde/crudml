@@ -25,6 +25,7 @@ import tum.ma.crudml.generator.access.FileType
 import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.generator.general.MarkerGenerator
 import tum.ma.crudml.generator.entity.AttributeGenerator
+import tum.ma.crudml.generator.general.CleanUpGenerator
 
 /**
  * Generates code from your model files on save.
@@ -65,7 +66,8 @@ class CrudmlGenerator implements IGenerator {
 			new MetadataGenerator(5),
 			new ServerSqlServiceGenerator(5),
 			new EntityGenerator(5),
-			new AttributeGenerator(10)
+			new AttributeGenerator(10),
+			new CleanUpGenerator(100)
 		).sortBy[BaseGenerator x | x.priority]
 		
 		// Generate one time components
@@ -113,6 +115,10 @@ class CrudmlGenerator implements IGenerator {
 	
 	def static getFile(FileType ident, String name){
 		return getFile(ident.toString + name)
+	}
+	
+	def static getFiles(){
+		return Files.values
 	}
 	
 	private def static getFile(String ident){
