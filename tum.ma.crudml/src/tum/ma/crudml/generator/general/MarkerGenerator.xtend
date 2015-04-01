@@ -22,11 +22,14 @@ class MarkerGenerator extends BaseGenerator {
 		var clientmanifest = CrudmlGenerator.createFile(FileType.ClientManifest, "META-INF/MANIFEST.MF", Component.client)
 		clientmanifest.addMarker(Identifier.ExportPackages, 10, 0, fsa)
 		clientmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0, fsa)
+		clientmanifest.addMarker(Identifier.LastStatement, 999, 0, fsa)
 		
 		/// SERVER ///
 		var servermanifest = CrudmlGenerator.createFile(FileType.ServerManifest, "META-INF/MANIFEST.MF", Component.server)
 		servermanifest.addMarker(Identifier.ExportPackages, 11, 0, fsa)
 		servermanifest.addMarker(Identifier.PreviousExportPackage, 10, 0, fsa)
+		servermanifest.addMarker(Identifier.LastStatement, 999, 0, fsa)
+		
 		var serverplugin = CrudmlGenerator.createFile(FileType.ServerPlugin, "plugin.xml", Component.server)
 		serverplugin.addMarker(Identifier.ExtensionService, 27, 0, fsa)
 		
@@ -34,6 +37,8 @@ class MarkerGenerator extends BaseGenerator {
 		var sharedmanifest = CrudmlGenerator.createFile(FileType.SharedManifest, "META-INF/MANIFEST.MF", Component.shared)
 		sharedmanifest.addMarker(Identifier.ExportPackages, 10, 0, fsa)
 		sharedmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0, fsa)
+		sharedmanifest.addMarker(Identifier.LastStatement, 999, 0, fsa)
+		
 		var texts = CrudmlGenerator.createFile(FileType.Texts, "resources/texts/Texts.properties", Component.shared)
 		texts.addMarker(Identifier.Content, 3, 0, fsa)
 	}

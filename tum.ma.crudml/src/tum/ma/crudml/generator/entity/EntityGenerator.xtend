@@ -33,10 +33,18 @@ class EntityGenerator extends BaseGenerator {
 				// client
 				fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.PreviousExportPackage, ",")
 				fsa.modifyLines(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages''') 
+				fsa.modifyLines(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.LastStatement, 
+'''
+
+''')
 				
 				// shared
 				fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.PreviousExportPackage, ",")
 				fsa.modifyLines(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages''') 
+				fsa.modifyLines(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.LastStatement, 
+'''
+
+''')
 				oneTimeOperationsExecuted = true;	
 			}
 			

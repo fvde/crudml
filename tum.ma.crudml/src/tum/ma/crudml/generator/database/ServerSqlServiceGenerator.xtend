@@ -20,6 +20,10 @@ class ServerSqlServiceGenerator extends BaseGenerator {
 		// create reference to export package
 		fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.PreviousExportPackage, ",")
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».server.services.common.sql''') 
+		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.LastStatement, 
+'''
+
+''')
 		
 		// create reference to service
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerPlugin), Identifier.ExtensionService,

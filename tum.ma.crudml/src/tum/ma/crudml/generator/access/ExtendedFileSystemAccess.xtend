@@ -125,11 +125,18 @@ import java.util.ArrayList
 		val contents = readTextFile(file)
 		var lines = contents.toString.split(System.getProperty("line.separator")).toList
 		
-		if (atTheBeginning){
-			lines.set(marker.line - 1, addition + lines.get(marker.line - 1))
+		// add to line if line actually exists
+		if (marker.line - 1 < lines.length){
+			if (atTheBeginning){
+				lines.set(marker.line - 1, addition + lines.get(marker.line - 1))
+			} else {
+				lines.set(marker.line - 1, lines.get(marker.line - 1) + addition)
+			}
+		// otherwise add new line
 		} else {
-			lines.set(marker.line - 1, lines.get(marker.line - 1) + addition)
+			lines = GeneratorUtilities.mergeAtLine(lines, addition.split(System.getProperty("line.separator")).toList, marker.line - 1)
 		}
+
 		
 		// Update file (No markers have changed!)
 		generateFile(file, GeneratorUtilities.getStringFromArray(lines))
