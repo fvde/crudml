@@ -8,6 +8,7 @@ import tum.ma.crudml.generator.CrudmlGenerator
 import tum.ma.crudml.generator.access.FileType
 import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.generator.BaseGenerator
+import tum.ma.crudml.generator.utilities.GeneratorUtilities
 
 class ServerSqlServiceGenerator extends BaseGenerator {
 	
@@ -64,7 +65,42 @@ public class DerbySqlService extends AbstractDerbySqlService {
 	}
 }
 ''')
-  	
+
+		// reset database if required
+  		if (CrudmlGenerator.dbDropAndCreate){
+  			val serverSession = CrudmlGenerator.createFile(FileType.ServerSession, "src/" + CrudmlGenerator.applicationName + "/server/ServerSession.java", Component.server)
+			fsa.modifyLines(serverSession, Identifier.Imports,
+'''
+import java.sql.SQLException;
+import java.sql.Statement;
+import org.eclipse.scout.rt.server.services.common.jdbc.SQL;
+import java.util.ArrayList;
+''') 
+
+			fsa.modifyLines(serverSession, Identifier.ExecLoadSession,
+'''
+
+    try {
+      Statement stmt = SQL.getConnection().createStatement();
+
+      ArrayList<String> queries = new ArrayList<String>();
+      «GeneratorUtilities.createMarker(Identifier.DBSetupStatements)»
+
+      for (int current = 0; current < queries.size(); current++) {
+        try {
+          stmt.execute(queries.get(current));
+        }
+        catch (Exception e) {
+          e.printStackTrace();
+        }
+
+      }
+    }
+    catch (SQLException e) {
+      e.printStackTrace();
+    }
+''') 
+  		}
 	}	
 	
 }

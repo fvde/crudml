@@ -70,6 +70,11 @@ import «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages.«e.
 			
 			// standardOutlineService
 			generateStandardOutlineService(e, fsa)
+			
+			// generate database tables
+			if (CrudmlGenerator.dbDropAndCreate){
+				generateDatabaseTables(e, fsa)
+			}
 		}
 		
 		
@@ -250,5 +255,12 @@ import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.«e.
 import org.eclipse.scout.commons.exception.ProcessingException;
 import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.«e.name.toFirstUpper»TablePageData;
 ''') 
+	}
+	
+	def generateDatabaseTables(Entity e, ExtendedFileSystemAccess fsa){
+		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerSession), Identifier.DBSetupStatements,
+'''	
+      queries.add("DROP TABLE «e.name.toUpperCase»");
+''')
 	}
 }

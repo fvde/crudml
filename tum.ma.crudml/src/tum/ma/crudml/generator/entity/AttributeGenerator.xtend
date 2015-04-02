@@ -11,10 +11,15 @@ import tum.ma.crudml.generator.CrudmlGenerator
 import tum.ma.crudml.generator.access.FileType
 import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.crudml.impl.MemberImpl
+import tum.ma.crudml.generator.utilities.GeneratorUtilities
 
 class AttributeGenerator extends BaseGenerator{
 	
 	private ExtendedFileSystemAccess fsa; 
+	private String dbCreationString = ""
+	private String primaryMemberName = ""
+	private String dbColumns = ""
+	private String dbBindings = ""
 	
 	new(int priority) {
 		super(priority)
@@ -30,6 +35,10 @@ class AttributeGenerator extends BaseGenerator{
 		
 		for (Entity e : entries){
 			var hasPrimary = false
+			dbCreationString = ""
+			primaryMemberName = ""
+			dbColumns = ""
+			dbBindings = ""
 			
 			for (Attribute a : e.attributes){
 
@@ -45,6 +54,9 @@ class AttributeGenerator extends BaseGenerator{
 			if (!hasPrimary){
 				generateMember(e, e.name + "Nr", "long", position, true)		
 			}
+				
+			// create db tables 
+			generateDatbaseTable(e)
 		}
 	}
 	
@@ -60,20 +72,32 @@ class AttributeGenerator extends BaseGenerator{
 		var name = memberName.toFirstUpper
 		var entityName = e.name.toFirstUpper
 		var tableHeader = memberName.toFirstUpper
+		var stringLength = ""
 		
 		switch primitiveType {
-			case "string" : tableType = "String"
+			case "string" : {
+					tableType = "String"
+					stringLength = "(100)"
+				}
 			case "int" : tableType = "Integer"
 			case "long" : tableType = "Long"
 			case "double" : tableType = "Double"
 			case "boolean" : tableType = "Boolean"
 		}
 		
+		// update database creation string
+		//TODO add constraints like not null
+		dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + " NOT NULL, "
+		dbColumns += memberName.toUpperCase + ", "
+		dbBindings += ":{" + memberName.toFirstLower + "}, "
+		
 		// create string for member name
 		CrudmlGenerator.createStringEntry(tableHeader, fsa)
 		
 		// add member to table page
 		if (isPrimary){
+			primaryMemberName = memberName.toUpperCase
+			
 			tableProperties = 
 '''
       @Override
@@ -149,4 +173,23 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»C
 		
 	}
 	
+	def private generateDatbaseTable(Entity e){
+		// create table
+		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerSession), Identifier.DBSetupStatements,
+'''	
+      queries.add("CREATE TABLE «e.name.toUpperCase» («dbCreationString»PRIMARY KEY(«primaryMemberName»))");
+''')
+
+		// sql statement for fetching data from database
+		dbColumns = dbColumns.substring(0, dbColumns.length - 2)
+		dbBindings = dbBindings.substring(0, dbBindings.length - 2)
+		
+		fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutlineService), Identifier.SqlStatementGetTableData, e.name.toFirstUpper,
+'''
+SQL.selectInto("SELECT «dbColumns»" +
+        " FROM  «e.name.toUpperCase»" +
+        " INTO «dbBindings»",
+        pageData);
+''') 	
+	}
 }

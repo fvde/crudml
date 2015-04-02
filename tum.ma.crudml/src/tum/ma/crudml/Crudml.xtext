@@ -14,7 +14,7 @@ PackageDeclaration:
 ;
  
 AbstractElement:
-  PackageDeclaration | Entity | Import | Right | Role | Metadata
+  PackageDeclaration | Entity | Import | Right | Role | Metadata | Persistence
 ;
  
 QualifiedName:
@@ -38,6 +38,29 @@ Metadata:
 
 MetadataEntry:
 	(type = ('workspace' | 'applicationName' | 'author' )) ':' value = ID
+;
+
+Persistence:
+	'persistence' 
+	'{'
+	  (entries += PersistenceEntry)*
+	'}'
+;
+
+PersistenceEntry:
+	DBConnectionDefinition | DBTypeDefiniton | DBSetupDefinition
+;
+
+DBConnectionDefinition:
+	(type = ('user' | 'password' | 'path') ':' value = ID)
+;
+
+DBTypeDefiniton:
+	'type' ':' value = ('derby')
+;
+
+DBSetupDefinition:
+	'setup' ':' value = ('dropAndCreate' | 'none')
 ;
   
 /* Entity block */

@@ -4,6 +4,8 @@ import org.eclipselabs.scwork.template.InputParam
 import org.eclipselabs.scwork.template.generator.ITextFileGenerator
 
 import static extension org.eclipselabs.scwork.template.generator.common.GeneratorExtensions.*
+import tum.ma.crudml.generator.access.Identifier
+import tum.ma.crudml.generator.utilities.GeneratorUtilities
 
 class ServerSessionJavaGenerator implements ITextFileGenerator {
 	
@@ -25,6 +27,7 @@ import org.eclipse.scout.commons.logger.IScoutLogger;
 import org.eclipse.scout.commons.logger.ScoutLogManager;
 import org.eclipse.scout.rt.server.AbstractServerSession;
 import org.eclipse.scout.rt.server.ServerJob;
+«GeneratorUtilities.createMarker(Identifier.Imports)»
 
 public class ServerSession extends AbstractServerSession {
   private static final long serialVersionUID = 1L;
@@ -44,7 +47,7 @@ public class ServerSession extends AbstractServerSession {
   @Override
   protected void execLoadSession() throws ProcessingException {
     logger.info("created a new session for " + getUserId());
-  }
+«GeneratorUtilities.createMarker(Identifier.ExecLoadSession)»  }
 }
 '''
 }

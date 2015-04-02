@@ -25,6 +25,17 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//MetadataEntry/type"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//MetadataEntry/value"/>
     </genClasses>
+    <genClasses ecoreClass="Crudml.ecore#//Persistence">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Crudml.ecore#//Persistence/entries"/>
+    </genClasses>
+    <genClasses ecoreClass="Crudml.ecore#//PersistenceEntry">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//PersistenceEntry/value"/>
+    </genClasses>
+    <genClasses ecoreClass="Crudml.ecore#//DBConnectionDefinition">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//DBConnectionDefinition/type"/>
+    </genClasses>
+    <genClasses ecoreClass="Crudml.ecore#//DBTypeDefiniton"/>
+    <genClasses ecoreClass="Crudml.ecore#//DBSetupDefinition"/>
     <genClasses ecoreClass="Crudml.ecore#//Entity">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Crudml.ecore#//Entity/annotations"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Entity/name"/>

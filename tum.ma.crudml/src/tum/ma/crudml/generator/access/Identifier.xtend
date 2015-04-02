@@ -11,5 +11,7 @@ enum Identifier {
 	LastStatement,
 	ExportPackages,
 	PreviousExportPackage,
-	ExtensionService
+	ExtensionService,
+	ExecLoadSession,
+	DBSetupStatements
 }

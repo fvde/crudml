@@ -26,6 +26,11 @@ import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.generator.general.MarkerGenerator
 import tum.ma.crudml.generator.entity.AttributeGenerator
 import tum.ma.crudml.generator.general.CleanUpGenerator
+import java.sql.DatabaseMetaData
+import tum.ma.crudml.crudml.PersistenceEntry
+import tum.ma.crudml.crudml.DBTypeDefiniton
+import tum.ma.crudml.crudml.DBSetupDefinition
+import tum.ma.crudml.crudml.DBConnectionDefinition
 
 /**
  * Generates code from your model files on save.
@@ -38,6 +43,8 @@ class CrudmlGenerator implements IGenerator {
 	public static String workspaceFolder = "Application"
 	public static String applicationName = "app"
 	public static String author = "default"
+	public static String dbType = "derby"
+	public static boolean dbDropAndCreate = false;
 	public static String dbAccess = "jdbc:derby:C:\\\\db\\\\DerbyDB"
 	public static String dbUser = "minicrm"
 	public static String dbPassword = "minicrm"
@@ -77,13 +84,42 @@ class CrudmlGenerator implements IGenerator {
 	}
 	
 	def parseMetadata(Resource resource){
-		val entries = resource.allContents.toIterable.filter(MetadataEntry)
-		for (MetadataEntry entry : entries){
+		val metaEntries = resource.allContents.toIterable.filter(MetadataEntry)
+		for (MetadataEntry entry : metaEntries){
 			switch entry {
 				case entry.type == "applicationName" : applicationName = entry.value
 				case entry.type == "author" : author = entry.value
 				case entry.type == "workspace" : workspaceFolder = entry.value
 			}
+		}
+		
+		val dbConnectionEntries = resource.allContents.toIterable.filter(DBConnectionDefinition)
+		var path = ""
+		for (DBConnectionDefinition entry : dbConnectionEntries){
+			switch entry {
+				case entry.type == "user" : dbUser = entry.value
+				case entry.type == "password" : dbPassword = entry.value
+				case entry.type == "path" : path = entry.value
+			}
+		}
+		
+		val dbtypeEntries = resource.allContents.toIterable.filter(DBTypeDefiniton)
+		for (DBTypeDefiniton entry : dbtypeEntries){
+			switch entry {
+				case entry.value == "derby" : dbType = "derby"
+			}
+		}
+		
+		val dbsetupEntries = resource.allContents.toIterable.filter(DBSetupDefinition)
+		for (DBSetupDefinition entry : dbsetupEntries){
+			switch entry {
+				case entry.value == "dropAndCreate" : dbDropAndCreate = true
+				case entry.value == "none" : dbDropAndCreate = false
+			}
+		}
+		
+		if (!path.isNullOrEmpty){
+			dbAccess = "jdbc:" + dbType + ":" + path;
 		}
 	}
 	

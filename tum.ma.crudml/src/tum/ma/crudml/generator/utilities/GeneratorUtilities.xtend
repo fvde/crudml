@@ -55,4 +55,17 @@ class GeneratorUtilities {
 	def private static createMarker(String identifier, int size){
 		return FileMarker.markerTag + identifier + FileMarker.markerAttributeTag + size + FileMarker.markerTag
 	}
+	
+		
+	def static getDBTypeFromType(String type){
+		switch type {
+			case "string" : return "VARCHAR"
+			case "int" : return "INTEGER"
+			case "long" : return "BIGINT"
+			case "double" : return "DOUBLE"
+			case "boolean" : return "BOOLEAN"
+			case "date" : return "DATE"
+		}
+	}
+	
 }

@@ -8,6 +8,7 @@ enum FileType {
 	ServerManifest,
 	ServerPlugin,
 	ServerSqlService,
+	ServerSession,
 	StandardOutlineService,
 	IStandardOutlineService,
 	SharedManifest,
