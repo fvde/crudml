@@ -290,9 +290,9 @@ public class «name»FormData extends AbstractFormData {
 		}
 		
 		// register strings
-		CrudmlGenerator.createStringEntry("Edit " + name + "...", fsa)
-		CrudmlGenerator.createStringEntry("New " + name + "...", fsa)
-		CrudmlGenerator.createStringEntry("Delete " + name + "...", fsa)
+		CrudmlGenerator.createStringEntry("Edit" + name, "Edit " + name + "...", fsa)
+		CrudmlGenerator.createStringEntry("New" + name, "New " + name + "...", fsa)
+		CrudmlGenerator.createStringEntry("Delete" + name, "Delete " + name + "...", fsa)
 	}
 	
 	def generateService(Entity e, ExtendedFileSystemAccess fsa){
@@ -328,14 +328,17 @@ public class «name»FormData extends AbstractFormData {
 
 		var sqlCreate = 
 '''
-
+SQL.insert("" +
+	"INSERT INTO «name.toUpperCase» («tableNames») " +
+	"VALUES («bindings»)"
+	, formData);
 '''
 		var sqlLoad = 
 '''
     SQL.selectInto("" +
         "SELECT «tableNames»" +
         "FROM   «name.toUpperCase» " +
-        "WHERE  «name.toUpperCase»_NR = :«name.toFirstLower»Nr " +
+        "WHERE  «name.toUpperCase + CrudmlGenerator.primaryKeyPostfix.toUpperCase» = :«name.toFirstLower + CrudmlGenerator.primaryKeyPostfix» " +
         "INTO   «bindings»"
         , formData);
 '''
@@ -344,7 +347,7 @@ public class «name»FormData extends AbstractFormData {
     SQL.update(
         "UPDATE «name.toUpperCase» " +
         "SET «setTable» " +
-        "WHERE  «name.toUpperCase»_NR = :«name.toFirstLower»Nr", formData);
+        "WHERE  «name.toUpperCase + CrudmlGenerator.primaryKeyPostfix.toUpperCase» = :«name.toFirstLower + CrudmlGenerator.primaryKeyPostfix»", formData);
 '''
 		
 		val service = fsa.generateFile(CrudmlGenerator.createFile(FileType.TableService, name, "src/" + CrudmlGenerator.applicationName + "/server/ui/desktop/form/" + name + "Service.java", Component.server),
@@ -527,7 +530,7 @@ public class «type + name»Permission extends BasicPermission {
 		}
 		
 		// Register field name //TODO annotation
-		CrudmlGenerator.createStringEntry(fieldName, fsa)
+		CrudmlGenerator.createStringEntry(fieldName + "Field", fieldName, fsa)
 		
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.Form, entityName), Identifier.FormClassContent, 
 '''	
@@ -584,6 +587,10 @@ import «CrudmlGenerator.applicationName».client.ui.desktop.form.«entityName»
 '''	
 import org.eclipse.scout.rt.extension.client.ui.action.menu.AbstractExtensibleMenu;
 import «CrudmlGenerator.applicationName».client.ui.desktop.form.«name»Form;
+import java.util.Set;
+import org.eclipse.scout.commons.CollectionUtility;
+import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
+import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 ''')
 		
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.TablePage, name), Identifier.TableContent, name, 
@@ -602,6 +609,30 @@ import «CrudmlGenerator.applicationName».client.ui.desktop.form.«name»Form;
         «name»Form form = new «name»Form();
         form.set«name»Nr(get«name»NrColumn().getSelectedValue());
         form.startModify();
+        form.waitFor();
+        if (form.isFormStored()) {
+          reloadPage();
+        }
+      }
+    }
+    
+    @Order(20.0)
+    public class New«name»Menu extends AbstractExtensibleMenu {
+
+      @Override
+      protected Set<? extends IMenuType> getConfiguredMenuTypes() {
+        return CollectionUtility.<IMenuType> hashSet(TableMenuType.EmptySpace);
+      }
+
+      @Override
+      protected String getConfiguredText() {
+        return TEXTS.get("New«name»");
+      }
+
+      @Override
+      protected void execAction() throws ProcessingException {
+        «name»Form form = new «name»Form();
+        form.startNew();
         form.waitFor();
         if (form.isFormStored()) {
           reloadPage();

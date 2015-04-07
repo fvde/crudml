@@ -52,7 +52,7 @@ class AttributeGenerator extends BaseGenerator{
 			
 			// If no attribute was marked as primary we add a primary key column
 			if (!hasPrimary){
-				generateMember(e, e.name + "Nr", "long", position, true)		
+				generateMember(e, e.name + CrudmlGenerator.primaryKeyPostfix, "long", position, true)		
 			}
 				
 			// create db tables 
@@ -84,7 +84,11 @@ class AttributeGenerator extends BaseGenerator{
 		
 		// update database creation string
 		//TODO add constraints like not null
-		dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + " NOT NULL, "
+		if (!isPrimary){
+			dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + " NOT NULL, "
+		} else {
+			dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + " NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+		}
 		dbColumns += memberName.toUpperCase + ", "
 		dbBindings += ":{" + memberName.toFirstLower + "}, "
 		
@@ -93,8 +97,6 @@ class AttributeGenerator extends BaseGenerator{
 		
 		// add member to table page
 		if (isPrimary){
-			primaryMemberName = memberName.toUpperCase
-			
 			tableProperties = 
 '''
       @Override
@@ -174,7 +176,7 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»C
 		// create table
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerSession), Identifier.DBSetupStatements,
 '''	
-      queries.add("CREATE TABLE «e.name.toUpperCase» («dbCreationString»PRIMARY KEY(«primaryMemberName»))");
+      queries.add("CREATE TABLE «e.name.toUpperCase» («dbCreationString.substring(0, dbCreationString.length - 2)»)");
 ''')
 
 		// sql statement for fetching data from database

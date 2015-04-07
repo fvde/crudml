@@ -49,6 +49,7 @@ class CrudmlGenerator implements IGenerator {
 	public static String dbAccess = "jdbc:derby:C:\\\\db\\\\DerbyDB"
 	public static String dbUser = "minicrm"
 	public static String dbPassword = "minicrm"
+	public static String primaryKeyPostfix = "Nr"
 	
 	// Some local variables
 	private static Map<String, ExtendedFile> Files = new HashMap<String, ExtendedFile>()
@@ -125,11 +126,15 @@ class CrudmlGenerator implements IGenerator {
 		}
 	}
 	
-	def static createStringEntry(String string, ExtendedFileSystemAccess fsa){
-		if (!registeredStrings.contains(string)){
-			registeredStrings.add(string)
-			fsa.modifyLines(getFile(FileType.Texts), Identifier.Content, string.toFirstUpper + "=" + string)
+	def static createStringEntry(String identifier, String content, ExtendedFileSystemAccess fsa){
+		if (!registeredStrings.contains(identifier)){
+			registeredStrings.add(identifier)
+			fsa.modifyLines(getFile(FileType.Texts), Identifier.Content, identifier.toFirstUpper + "=" + content)
 		}
+	}
+	
+	def static createStringEntry(String string, ExtendedFileSystemAccess fsa){
+		createStringEntry(string, string, fsa)
 	}
 
 	def static createFile(FileType ident, String path, Component comp){
