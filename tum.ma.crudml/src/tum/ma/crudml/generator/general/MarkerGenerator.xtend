@@ -24,6 +24,8 @@ class MarkerGenerator extends BaseGenerator {
 		clientmanifest.addMarker(Identifier.PreviousExportPackage, 9, 0, fsa)
 		clientmanifest.addMarker(Identifier.LastStatement, 999, 0, fsa)
 		
+		var clientplugin = CrudmlGenerator.createFile(FileType.ClientPlugin, "plugin.xml", Component.client)
+		
 		/// SERVER ///
 		var servermanifest = CrudmlGenerator.createFile(FileType.ServerManifest, "META-INF/MANIFEST.MF", Component.server)
 		servermanifest.addMarker(Identifier.ExportPackages, 11, 0, fsa)

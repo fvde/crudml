@@ -5,6 +5,8 @@ enum Identifier {
 	Title,
 	TableContent,
 	TableRowData,
+	FormClassContent,
+	FormBoxContent,
 	SqlStatementGetTableData,
 	Imports,
 	Members,

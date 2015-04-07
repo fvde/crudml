@@ -31,10 +31,10 @@ class AttributeGenerator extends BaseGenerator{
 		
 		// get entities
 		val entries = input.allContents.toIterable.filter(Entity)
-		var position = 10
 		
 		for (Entity e : entries){
 			var hasPrimary = false
+			var position = 10
 			dbCreationString = ""
 			primaryMemberName = ""
 			dbColumns = ""
@@ -76,14 +76,11 @@ class AttributeGenerator extends BaseGenerator{
 		
 		switch primitiveType {
 			case "string" : {
-					tableType = "String"
 					stringLength = "(100)"
 				}
-			case "int" : tableType = "Integer"
-			case "long" : tableType = "Long"
-			case "double" : tableType = "Double"
-			case "boolean" : tableType = "Boolean"
 		}
+		
+		tableType = GeneratorUtilities.getJavaTypeFromType(primitiveType)
 		
 		// update database creation string
 		//TODO add constraints like not null
@@ -181,6 +178,7 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»C
 ''')
 
 		// sql statement for fetching data from database
+		// Note that there are always members, at least the primary key one
 		dbColumns = dbColumns.substring(0, dbColumns.length - 2)
 		dbBindings = dbBindings.substring(0, dbBindings.length - 2)
 		

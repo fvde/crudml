@@ -31,6 +31,7 @@ import tum.ma.crudml.crudml.PersistenceEntry
 import tum.ma.crudml.crudml.DBTypeDefiniton
 import tum.ma.crudml.crudml.DBSetupDefinition
 import tum.ma.crudml.crudml.DBConnectionDefinition
+import tum.ma.crudml.generator.entity.FormGenerator
 
 /**
  * Generates code from your model files on save.
@@ -74,6 +75,7 @@ class CrudmlGenerator implements IGenerator {
 			new ServerSqlServiceGenerator(5),
 			new EntityGenerator(5),
 			new AttributeGenerator(10),
+			new FormGenerator(20),
 			new CleanUpGenerator(100)
 		).sortBy[BaseGenerator x | x.priority]
 		

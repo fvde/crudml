@@ -18,22 +18,6 @@ class ServerSqlServiceGenerator extends BaseGenerator {
 	
 	override doGenerate(Resource input, ExtendedFileSystemAccess fsa) {
 
-		// create reference to export package
-		fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.PreviousExportPackage, ",")
-		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».server.services.common.sql''') 
-		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.LastStatement, 
-'''
-
-''')
-		
-		// create reference to service
-		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerPlugin), Identifier.ExtensionService,
-'''		<service
-			factory="org.eclipse.scout.rt.server.services.ServerServiceFactory"
-			class="«CrudmlGenerator.applicationName».server.services.common.sql.DerbySqlService"
-			session="«CrudmlGenerator.applicationName».server.ServerSession">
-		</service>''')
-
   		// Create sql service
   		fsa.generateFile(CrudmlGenerator.createFile(FileType.ServerSqlService, "src/" + CrudmlGenerator.applicationName + "/server/services/common/sql/DerbySqlService.java", Component.server),
 '''

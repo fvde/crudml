@@ -5,6 +5,8 @@ import org.eclipselabs.scwork.template.ProjectType
 import org.eclipselabs.scwork.template.generator.ITextFileGenerator
 
 import static extension org.eclipselabs.scwork.template.generator.common.GeneratorExtensions.*
+import tum.ma.crudml.generator.utilities.GeneratorUtilities
+import tum.ma.crudml.generator.access.Identifier
 
 class ClientPluginXmlGenerator implements ITextFileGenerator {
 	
@@ -32,7 +34,7 @@ class ClientPluginXmlGenerator implements ITextFileGenerator {
             factory="org.eclipse.scout.rt.client.services.ClientProxyServiceFactory"
             class="«param.sharedProjectName».services.IDesktopService">
       </proxy>«ENDIF»
-   </extension>
+«GeneratorUtilities.createMarker(Identifier.ExtensionService)»   </extension>
 
 </plugin>
 '''

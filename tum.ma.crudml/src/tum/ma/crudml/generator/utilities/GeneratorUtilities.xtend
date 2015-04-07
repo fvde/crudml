@@ -68,4 +68,13 @@ class GeneratorUtilities {
 		}
 	}
 	
+	def static getJavaTypeFromType(String type){
+		switch type {
+			case "string" : return "String"
+			case "int" : return "Integer"
+			case "long" : return "Long"
+			case "double" : return "Double"
+			case "boolean" : return "Boolean"
+		}
+	}	
 }

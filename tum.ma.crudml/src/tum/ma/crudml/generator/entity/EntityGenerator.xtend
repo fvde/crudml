@@ -13,8 +13,6 @@ import tum.ma.crudml.generator.utilities.GeneratorUtilities
 
 class EntityGenerator extends BaseGenerator {
 	
-	private static var oneTimeOperationsExecuted = false
-	
 	new(int priority) {
 		super(priority)
 	}
@@ -25,28 +23,8 @@ class EntityGenerator extends BaseGenerator {
 		val entries = input.allContents.toIterable.filter(Entity)
 		var registeredEntities = ""
 		var registeredEntityImports = ""
-		oneTimeOperationsExecuted = false;
 		
 		for (Entity e : entries){
-			// register packages
-			if (!oneTimeOperationsExecuted){
-				// client
-				fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.PreviousExportPackage, ",")
-				fsa.modifyLines(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages''') 
-				fsa.modifyLines(CrudmlGenerator.getFile(FileType.ClientManifest), Identifier.LastStatement, 
-'''
-
-''')
-				
-				// shared
-				fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.PreviousExportPackage, ",")
-				fsa.modifyLines(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.ExportPackages,''' «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages''') 
-				fsa.modifyLines(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.LastStatement, 
-'''
-
-''')
-				oneTimeOperationsExecuted = true;	
-			}
 			
 			// registry string
 			registeredEntities += 
