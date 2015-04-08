@@ -12,6 +12,7 @@ import tum.ma.crudml.crudml.Attribute
 import tum.ma.crudml.crudml.Member
 import tum.ma.crudml.generator.access.Component
 import java.util.ArrayList
+import tum.ma.crudml.generator.utilities.GeneratorUtilities
 
 class LookupServiceGenerator extends BaseGenerator {
 	
@@ -38,7 +39,7 @@ class LookupServiceGenerator extends BaseGenerator {
 		// first identify descritors for the entity, that we can use to search
 		var select = alias + "." + primaryTable
 		var text = ""
-		val descriptors = getDescriptors(e)
+		val descriptors = GeneratorUtilities.getDescriptors(e)
 		
 		if (descriptors.length > 0){
 			var descriptorTables = ""
@@ -124,28 +125,7 @@ public interface I«name»LookupService extends ILookupService<Long> {
 ''')
 	}
 	
-	def getDescriptors(Entity e){
-		var result = new ArrayList<Member>()
-		
-		for (Attribute a : e.attributes){
-			if (a instanceof Member){
-				val member = a as Member
-				val name = member.name.toLowerCase
-				
-				if (member.primitive.equals("string")){
-					// search for common keywords for descriptors
-					if (name.equals("name") || name.equals("id")){
-						result.add(member)
-					}
-				}
-	
-				// also use descriptor annotation
-				// TODO
-			}
-		}
-		
-		return result
-	}
+
 	
 	
 	def registerInPlugins(Entity e, ExtendedFileSystemAccess fsa){

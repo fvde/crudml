@@ -3,6 +3,9 @@ package tum.ma.crudml.generator.utilities
 import java.util.ArrayList
 import tum.ma.crudml.generator.access.FileMarker
 import tum.ma.crudml.generator.access.Identifier
+import tum.ma.crudml.crudml.Entity
+import tum.ma.crudml.crudml.Member
+import tum.ma.crudml.crudml.Attribute
 
 class GeneratorUtilities {
 	def static getStringFromArray(Iterable<String> iterable){
@@ -56,6 +59,28 @@ class GeneratorUtilities {
 		return FileMarker.markerTag + identifier + FileMarker.markerAttributeTag + size + FileMarker.markerTag
 	}
 	
+	def static getDescriptors(Entity e){
+		var result = new ArrayList<Member>()
+		
+		for (Attribute a : e.attributes){
+			if (a instanceof Member){
+				val member = a as Member
+				val name = member.name.toLowerCase
+				
+				if (member.primitive.equals("string")){
+					// search for common keywords for descriptors
+					if (name.equals("name") || name.equals("id")){
+						result.add(member)
+					}
+				}
+	
+				// also use descriptor annotation
+				// TODO
+			}
+		}
+		
+		return result
+	}
 		
 	def static getDBTypeFromType(String type){
 		switch type {

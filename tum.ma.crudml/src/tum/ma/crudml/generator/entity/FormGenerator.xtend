@@ -359,6 +359,12 @@ SQL.insert("" +
         "SET «setTable» " +
         "WHERE  «name.toUpperCase + CrudmlGenerator.primaryKeyPostfix.toUpperCase» = :«name.toFirstLower + CrudmlGenerator.primaryKeyPostfix»", formData);
 '''
+		var sqlDelete = 
+'''
+    SQL.delete(
+        "DELETE FROM «name.toUpperCase» " +
+        "WHERE  «name.toUpperCase + CrudmlGenerator.primaryKeyPostfix.toUpperCase» = :«name.toFirstLower + CrudmlGenerator.primaryKeyPostfix»", formData);
+'''
 		
 		val service = fsa.generateFile(CrudmlGenerator.createFile(FileType.TableService, name, "src/" + CrudmlGenerator.applicationName + "/server/ui/desktop/form/" + name + "Service.java", Component.server),
 '''
@@ -404,13 +410,23 @@ public class «name»Service extends AbstractService implements I«name»Service
 «sqlLoad»
     return formData;
   }
-
+  
   @Override
   public «name»FormData prepareCreate(«name»FormData formData) throws ProcessingException {
     if (!ACCESS.check(new Create«name»Permission())) {
       throw new VetoException(TEXTS.get("AuthorizationFailed"));
     }
+    
+    return formData;
+  }
 
+  @Override
+  public «name»FormData delete(«name»FormData formData) throws ProcessingException {
+    if (!ACCESS.check(new Delete«name»Permission())) {
+      throw new VetoException(TEXTS.get("AuthorizationFailed"));
+    }
+
+«sqlDelete»
     return formData;
   }
 
@@ -465,6 +481,13 @@ public interface I«name»Service extends IService {
    * @throws org.eclipse.scout.commons.exception.ProcessingException
    */
   «name»FormData prepareCreate(«name»FormData formData) throws ProcessingException;
+  
+  /**
+   * @param formData
+   * @return
+   * @throws org.eclipse.scout.commons.exception.ProcessingException
+   */
+  «name»FormData delete(«name»FormData formData) throws ProcessingException;
 
   /**
    * @param formData
@@ -526,6 +549,7 @@ public class «type + name»Permission extends BasicPermission {
 	def generateFormField(Entity e, Attribute a, ExtendedFileSystemAccess fsa ){
 		val entityName = e.name.toFirstUpper
 		var fieldName = ""
+		var fieldDisplayName = ""
 		var fieldClass = ""
 		var fieldType = ""
 		var lookUpCall = ""
@@ -535,6 +559,7 @@ public class «type + name»Permission extends BasicPermission {
 		switch a {
 			case (a instanceof Member) : {
 				fieldName = (a as Member).name.toFirstUpper
+				fieldDisplayName = fieldName
 				fieldType = GeneratorUtilities.getJavaTypeFromType((a as Member).primitive)
 				fieldClass = fieldType
 			}
@@ -543,6 +568,7 @@ public class «type + name»Permission extends BasicPermission {
 				switch r.reftype {
 					case "one" : {
 						fieldName = r.name.toFirstUpper + CrudmlGenerator.primaryKeyPostfix
+						fieldDisplayName = r.name.toFirstUpper
 						fieldClass = "Smart"
 						fieldType = "Long"
 						smartFieldPostfix = "<Long>"
@@ -567,7 +593,7 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
 		}
 		
 		// Register field name //TODO annotation
-		CrudmlGenerator.createStringEntry(fieldName + "Field", fieldName, fsa)
+		CrudmlGenerator.createStringEntry(fieldDisplayName + "Field", fieldDisplayName, fsa)
 		
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.Form, entityName), Identifier.FormClassContent, 
 '''	
@@ -587,7 +613,7 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
 
         @Override
         protected String getConfiguredLabel() {
-          return TEXTS.get("«fieldName»Field");
+          return TEXTS.get("«fieldDisplayName»Field");
         }
         «lookUpCall»
       }
@@ -630,6 +656,10 @@ import java.util.Set;
 import org.eclipse.scout.commons.CollectionUtility;
 import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
+import app.shared.ui.desktop.form.I«name»Service;
+import app.shared.ui.desktop.form.«name»FormData;
+import org.eclipse.scout.rt.client.ui.messagebox.MessageBox;
+
 ''')
 		
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.TablePage, name), Identifier.TableContent, name, 
@@ -674,6 +704,25 @@ import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
         form.startNew();
         form.waitFor();
         if (form.isFormStored()) {
+          reloadPage();
+        }
+      }
+    }
+    
+    @Order(20.0)
+    public class Delete«name»Menu extends AbstractExtensibleMenu {
+
+      @Override
+      protected String getConfiguredText() {
+        return TEXTS.get("Delete«name»");
+      }
+
+      @Override
+      protected void execAction() throws ProcessingException {
+        if (MessageBox.showDeleteConfirmationMessage("«name»")) {
+          «name»FormData data = new «name»FormData();
+          data.set«name»Nr(get«name»NrColumn().getSelectedValue());
+          SERVICES.getService(I«name»Service.class).delete(data);
           reloadPage();
         }
       }
