@@ -32,6 +32,7 @@ import tum.ma.crudml.crudml.DBTypeDefiniton
 import tum.ma.crudml.crudml.DBSetupDefinition
 import tum.ma.crudml.crudml.DBConnectionDefinition
 import tum.ma.crudml.generator.entity.FormGenerator
+import tum.ma.crudml.generator.database.LookupServiceGenerator
 
 /**
  * Generates code from your model files on save.
@@ -39,8 +40,7 @@ import tum.ma.crudml.generator.entity.FormGenerator
  * see http://www.eclipse.org/Xtext/documentation.html#TutorialCodeGeneration
  */
 class CrudmlGenerator implements IGenerator {
-		
-	//TODO expose in crudml
+
 	public static String workspaceFolder = "Application"
 	public static String applicationName = "app"
 	public static String author = "default"
@@ -77,6 +77,7 @@ class CrudmlGenerator implements IGenerator {
 			new EntityGenerator(5),
 			new AttributeGenerator(10),
 			new FormGenerator(20),
+			new LookupServiceGenerator(30),
 			new CleanUpGenerator(100)
 		).sortBy[BaseGenerator x | x.priority]
 		

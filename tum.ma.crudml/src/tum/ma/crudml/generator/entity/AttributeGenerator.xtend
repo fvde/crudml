@@ -52,7 +52,8 @@ class AttributeGenerator extends BaseGenerator{
 			
 			// If no attribute was marked as primary we add a primary key column
 			if (!hasPrimary){
-				generateMember(e, e.name + CrudmlGenerator.primaryKeyPostfix, "long", position, true)		
+				var name = e.name + CrudmlGenerator.primaryKeyPostfix
+				generateMember(e, name, name, "long", position, true)		
 			}
 				
 			// create db tables 
@@ -62,16 +63,17 @@ class AttributeGenerator extends BaseGenerator{
 	
 		
 	def private generateMember(Entity e, Member m, int memberPosition, boolean isPrimary){
-		generateMember(e, m.name, m.primitive, memberPosition, false)
+		generateMember(e, m.name, m.name, m.primitive, memberPosition, false)
 	}
 	
-	def private generateMember(Entity e, String memberName, String primitiveType, int memberPosition, boolean isPrimary){
+	def private generateMember(Entity e, String memberName, String displayName, String primitiveType, int memberPosition, boolean isPrimary){
 		var tableType = ""
 		var tableImport = ""
 		var tableProperties = ""
+		var tableWidth = 200;
 		var name = memberName.toFirstUpper
 		var entityName = e.name.toFirstUpper
-		var tableHeader = memberName.toFirstUpper
+		var tableHeader = displayName.toFirstUpper
 		var stringLength = ""
 		
 		switch primitiveType {
@@ -116,6 +118,11 @@ class AttributeGenerator extends BaseGenerator{
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("«tableHeader»");
+      }
+         
+      @Override
+      protected int getConfiguredWidth() {
+        return «tableWidth»;
       }
 '''
 		}
@@ -169,7 +176,10 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»C
 	}
 	
 	def private generateReference(Entity e, Reference r, int position){
-		
+		switch r.reftype {
+			case "one" : generateMember(e, r.name + CrudmlGenerator.primaryKeyPostfix, r.name, "long", position, false)
+			case "many" : { }
+		}
 	}
 	
 	def private generateDatbaseTable(Entity e){

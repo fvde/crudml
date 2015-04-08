@@ -35,6 +35,7 @@ class MetadataGenerator extends BaseGenerator{
 		fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.PreviousExportPackage, ",")
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.ExportPackages,
 ''' «CrudmlGenerator.applicationName».shared.ui.desktop.form,
+ «CrudmlGenerator.applicationName».shared.services.lookup,
  «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages
 ''') 
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.LastStatement, 
@@ -46,6 +47,7 @@ class MetadataGenerator extends BaseGenerator{
 		fsa.addToLineEnd(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.PreviousExportPackage, ",")
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.ExportPackages,
 ''' «CrudmlGenerator.applicationName».server.ui.desktop.form,
+ «CrudmlGenerator.applicationName».server.services.lookup,
  «CrudmlGenerator.applicationName».server.services.common.sql
 ''') 
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerManifest), Identifier.LastStatement, 

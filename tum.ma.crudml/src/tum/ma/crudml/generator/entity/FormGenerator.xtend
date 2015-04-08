@@ -58,6 +58,7 @@ import org.eclipse.scout.rt.client.ui.form.fields.integerfield.AbstractIntegerFi
 import org.eclipse.scout.rt.client.ui.form.fields.longfield.AbstractLongField;
 import org.eclipse.scout.rt.client.ui.form.fields.stringfield.AbstractStringField;
 import org.eclipse.scout.rt.client.ui.form.fields.booleanfield.AbstractBooleanField;
+import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.service.SERVICES;
 import «CrudmlGenerator.applicationName».client.ui.desktop.form.«name»Form.MainBox.CancelButton;
@@ -315,7 +316,16 @@ public class «name»FormData extends AbstractFormData {
 					setTable += attribute.name.toUpperCase + " = :" + attribute.name.toFirstLower + ", "
 				}
 				case (a instanceof Reference) : {
-					// TODO
+					val r = a as Reference
+					
+					switch r.reftype {
+						case "one" : {
+							hasAttributes = true
+							tableNames += r.name.toUpperCase + CrudmlGenerator.primaryKeyPostfix.toUpperCase + ", "
+							bindings += ":" + r.name.toFirstLower + CrudmlGenerator.primaryKeyPostfix + ", "
+							setTable += r.name.toUpperCase + CrudmlGenerator.primaryKeyPostfix.toUpperCase + " = :" + r.name.toFirstLower + CrudmlGenerator.primaryKeyPostfix + ", "
+						}
+					}
 				}
 			} 
 		}
@@ -516,16 +526,43 @@ public class «type + name»Permission extends BasicPermission {
 	def generateFormField(Entity e, Attribute a, ExtendedFileSystemAccess fsa ){
 		val entityName = e.name.toFirstUpper
 		var fieldName = ""
+		var fieldClass = ""
 		var fieldType = ""
+		var lookUpCall = ""
+		var smartFieldImports = ""
+		var smartFieldPostfix = ""
 		
 		switch a {
 			case (a instanceof Member) : {
 				fieldName = (a as Member).name.toFirstUpper
 				fieldType = GeneratorUtilities.getJavaTypeFromType((a as Member).primitive)
+				fieldClass = fieldType
 			}
 			case (a instanceof Reference) : {
-				// TODO
-				return;
+				val r = a as Reference
+				switch r.reftype {
+					case "one" : {
+						fieldName = r.name.toFirstUpper + CrudmlGenerator.primaryKeyPostfix
+						fieldClass = "Smart"
+						fieldType = "Long"
+						smartFieldPostfix = "<Long>"
+						lookUpCall = 
+						'''
+						@Override
+						protected Class<? extends ILookupCall<Long>> getConfiguredLookupCall() {
+							return «r.type.name.toFirstUpper»LookupCall.class;
+						}
+						'''
+						smartFieldImports = 
+						'''
+import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
+import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.toFirstUpper»LookupCall;
+						'''
+					}
+					case "many" : {
+						//TODO
+					}
+				}
 			}
 		}
 		
@@ -546,18 +583,20 @@ public class «type + name»Permission extends BasicPermission {
 '''	
 
       @Order(«formBoxOrder».0)
-      public class «fieldName»Field extends Abstract«fieldType»Field {
+      public class «fieldName»Field extends Abstract«fieldClass»Field«smartFieldPostfix» {
 
         @Override
         protected String getConfiguredLabel() {
           return TEXTS.get("«fieldName»Field");
         }
+        «lookUpCall»
       }
 ''')
 
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.Form, entityName), Identifier.Imports, 
 '''	
 import «CrudmlGenerator.applicationName».client.ui.desktop.form.«entityName»Form.MainBox.«entityName»Box.«fieldName»Field;
+«smartFieldImports»
 ''')
 
 		// now the formData

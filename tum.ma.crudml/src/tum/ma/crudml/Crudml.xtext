@@ -91,15 +91,7 @@ Member:
 ;
 
 Reference:
-	SingleEntityReference | MultiEntityReference
-;
-
-MultiEntityReference:
-	(many ?= 'many') multirefname = ID ':' type = [Entity | QualifiedName]
-;
-
-SingleEntityReference:
-	(one ?= 'one') singlerefname = ID ':' type = [Entity | QualifiedName]
+	reftype = ('many' | 'one') name = ID ':' type = [Entity]
 ;
 
 /* Operations block */
