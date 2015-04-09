@@ -63,7 +63,9 @@ import java.util.ArrayList;
 
 			fsa.modifyLines(serverSession, Identifier.ExecLoadSession,
 '''
-
+    if (databaseDroppedAndCreated){
+    	return;
+    }
     try {
       Statement stmt = SQL.getConnection().createStatement();
 
@@ -76,9 +78,10 @@ import java.util.ArrayList;
         }
         catch (Exception e) {
           e.printStackTrace();
-        }
-
-      }
+		}
+		
+		}
+	databaseDroppedAndCreated = true;	
     }
     catch (SQLException e) {
       e.printStackTrace();

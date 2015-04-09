@@ -12,6 +12,8 @@ import tum.ma.crudml.generator.access.FileType
 import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.crudml.impl.MemberImpl
 import tum.ma.crudml.generator.utilities.GeneratorUtilities
+import tum.ma.crudml.crudml.Annotation
+import java.util.Arrays
 
 class AttributeGenerator extends BaseGenerator{
 	
@@ -53,7 +55,7 @@ class AttributeGenerator extends BaseGenerator{
 			// If no attribute was marked as primary we add a primary key column
 			if (!hasPrimary){
 				var name = e.name + CrudmlGenerator.primaryKeyPostfix
-				generateMember(e, name, name, "long", position, true)		
+				generateMember(e, name, name, "long", position, true, Arrays.asList())		
 			}
 				
 			// create db tables 
@@ -63,10 +65,16 @@ class AttributeGenerator extends BaseGenerator{
 	
 		
 	def private generateMember(Entity e, Member m, int memberPosition, boolean isPrimary){
-		generateMember(e, m.name, m.name, m.primitive, memberPosition, false)
+		var displayName = GeneratorUtilities.getName(m.annotations)
+		
+		if (displayName.isNullOrEmpty){
+			displayName = m.name
+		}
+		
+		generateMember(e, m.name, displayName, m.primitive, memberPosition, isPrimary, m.annotations)
 	}
 	
-	def private generateMember(Entity e, String memberName, String displayName, String primitiveType, int memberPosition, boolean isPrimary){
+	def private generateMember(Entity e, String memberName, String displayName, String primitiveType, int memberPosition, boolean isPrimary, Iterable<Annotation> annotations){
 		var tableType = ""
 		var tableImport = ""
 		var tableProperties = ""
@@ -75,27 +83,38 @@ class AttributeGenerator extends BaseGenerator{
 		var entityName = e.name.toFirstUpper
 		var tableHeader = displayName.toFirstUpper
 		var stringLength = ""
+		var notNullString = ""
+		val notNull = GeneratorUtilities.notNull(annotations)
+		
+		val annotatedDisplayName = GeneratorUtilities.getName(annotations)
+		if (!annotatedDisplayName.isNullOrEmpty){
+			// remove starting and trailing " and '
+			tableHeader = annotatedDisplayName
+		}
+		
+		if (notNull) {
+			notNullString = " NOT NULL"
+		}
 		
 		switch primitiveType {
 			case "string" : {
-					stringLength = "(100)"
+					stringLength = "(" + GeneratorUtilities.getLength(annotations) +")"
 				}
 		}
 		
 		tableType = GeneratorUtilities.getJavaTypeFromType(primitiveType)
 		
-		// update database creation string
-		//TODO add constraints like not null
+		// database creation string
 		if (!isPrimary){
-			dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + " NOT NULL, "
+			dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + notNullString + ", "
 		} else {
-			dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + " NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+			dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + notNullString + " GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
 		}
 		dbColumns += memberName.toUpperCase + ", "
 		dbBindings += ":{" + memberName.toFirstLower + "}, "
 		
 		// create string for member name
-		CrudmlGenerator.createStringEntry(tableHeader, fsa)
+		CrudmlGenerator.createStringEntry(tableHeader.replace(' ', ''), tableHeader, fsa)
 		
 		// add member to table page
 		if (isPrimary){
@@ -117,12 +136,17 @@ class AttributeGenerator extends BaseGenerator{
 
       @Override
       protected String getConfiguredHeaderText() {
-        return TEXTS.get("«tableHeader»");
+        return TEXTS.get("«tableHeader.replace(' ', '').toFirstUpper»");
       }
          
       @Override
       protected int getConfiguredWidth() {
         return «tableWidth»;
+      }
+      
+      @Override
+      protected boolean getConfiguredMandatory() {
+        return «notNull»;
       }
 '''
 		}
@@ -177,7 +201,7 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»C
 	
 	def private generateReference(Entity e, Reference r, int position){
 		switch r.reftype {
-			case "one" : generateMember(e, r.name + CrudmlGenerator.primaryKeyPostfix, r.name, "long", position, false)
+			case "one" : generateMember(e, r.name + CrudmlGenerator.primaryKeyPostfix, r.name, "long", position, false, r.annotations)
 			case "many" : { }
 		}
 	}

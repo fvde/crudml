@@ -4,6 +4,7 @@ import org.eclipselabs.scwork.template.InputParam
 import org.eclipselabs.scwork.template.generator.ITextFileGenerator
 
 import static extension org.eclipselabs.scwork.template.generator.common.GeneratorExtensions.*
+import tum.ma.crudml.generator.CrudmlGenerator
 
 class TextsPropertiesGenerator implements ITextFileGenerator {
 	
@@ -18,7 +19,7 @@ class TextsPropertiesGenerator implements ITextFileGenerator {
 	override provideContent(InputParam param) 
 '''
 AboutMenu=&About...
-ApplicationTitle=My Application
+ApplicationTitle=«CrudmlGenerator.applicationName»
 AuthorizationFailed=Permission denied
 ExitMenu=E&xit
 ExportToExcelDiagramMenu=Export to Excel &diagram

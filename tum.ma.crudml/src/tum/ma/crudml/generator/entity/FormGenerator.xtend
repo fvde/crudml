@@ -555,13 +555,27 @@ public class «type + name»Permission extends BasicPermission {
 		var lookUpCall = ""
 		var smartFieldImports = ""
 		var smartFieldPostfix = ""
+		var isMandatory = ""
+		var maxLength = ""
 		
 		switch a {
 			case (a instanceof Member) : {
-				fieldName = (a as Member).name.toFirstUpper
+				val m = a as Member
+				fieldName = m.name.toFirstUpper
 				fieldDisplayName = fieldName
-				fieldType = GeneratorUtilities.getJavaTypeFromType((a as Member).primitive)
+				fieldType = GeneratorUtilities.getJavaTypeFromType(m.primitive)
 				fieldClass = fieldType
+				
+				if (fieldType.equals("String")){
+								isMandatory = 
+			'''
+
+        @Override
+        protected int getConfiguredMaxLength() {
+          return «GeneratorUtilities.getLength(m.annotations)»;
+        }
+			'''
+				}
 			}
 			case (a instanceof Reference) : {
 				val r = a as Reference
@@ -574,6 +588,7 @@ public class «type + name»Permission extends BasicPermission {
 						smartFieldPostfix = "<Long>"
 						lookUpCall = 
 						'''
+						
 						@Override
 						protected Class<? extends ILookupCall<Long>> getConfiguredLookupCall() {
 							return «r.type.name.toFirstUpper»LookupCall.class;
@@ -592,8 +607,27 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
 			}
 		}
 		
-		// Register field name //TODO annotation
-		CrudmlGenerator.createStringEntry(fieldDisplayName + "Field", fieldDisplayName, fsa)
+		// check annotations
+		if(GeneratorUtilities.notNull(a.annotations)){
+			isMandatory = 
+			'''
+
+        @Override
+        protected boolean getConfiguredMandatory() {
+          return true;
+        }
+			'''
+		}
+		
+		val annotatedDisplayName = GeneratorUtilities.getName(a.annotations)
+		if (!annotatedDisplayName.isNullOrEmpty){
+			fieldDisplayName = annotatedDisplayName
+		}
+		
+		// Register field name
+		// remove whitespaces
+		var displaynameIdentifier = fieldDisplayName.replace(' ', '').toFirstUpper
+		CrudmlGenerator.createStringEntry(displaynameIdentifier + "Field", fieldDisplayName, fsa)
 		
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.Form, entityName), Identifier.FormClassContent, 
 '''	
@@ -613,8 +647,10 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
 
         @Override
         protected String getConfiguredLabel() {
-          return TEXTS.get("«fieldDisplayName»Field");
+          return TEXTS.get("«displaynameIdentifier»Field");
         }
+        «isMandatory»
+        «maxLength»
         «lookUpCall»
       }
 ''')
@@ -656,8 +692,8 @@ import java.util.Set;
 import org.eclipse.scout.commons.CollectionUtility;
 import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
-import app.shared.ui.desktop.form.I«name»Service;
-import app.shared.ui.desktop.form.«name»FormData;
+import «CrudmlGenerator.applicationName».shared.ui.desktop.form.I«name»Service;
+import «CrudmlGenerator.applicationName».shared.ui.desktop.form.«name»FormData;
 import org.eclipse.scout.rt.client.ui.messagebox.MessageBox;
 
 ''')

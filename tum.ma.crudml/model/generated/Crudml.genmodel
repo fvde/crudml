@@ -37,15 +37,11 @@
     <genClasses ecoreClass="Crudml.ecore#//DBTypeDefiniton"/>
     <genClasses ecoreClass="Crudml.ecore#//DBSetupDefinition"/>
     <genClasses ecoreClass="Crudml.ecore#//Entity">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Crudml.ecore#//Entity/annotations"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Entity/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Crudml.ecore#//Entity/attributes"/>
     </genClasses>
-    <genClasses ecoreClass="Crudml.ecore#//Annotation"/>
-    <genClasses ecoreClass="Crudml.ecore#//UiLevel">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//UiLevel/level"/>
-    </genClasses>
     <genClasses ecoreClass="Crudml.ecore#//Attribute">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Crudml.ecore#//Attribute/annotations"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Attribute/name"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Crudml.ecore#//Attribute/type"/>
     </genClasses>
@@ -55,15 +51,10 @@
     <genClasses ecoreClass="Crudml.ecore#//Reference">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Reference/reftype"/>
     </genClasses>
-    <genClasses ecoreClass="Crudml.ecore#//MultiEntityReference">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//MultiEntityReference/many"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//MultiEntityReference/multirefname"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Crudml.ecore#//MultiEntityReference/type"/>
-    </genClasses>
-    <genClasses ecoreClass="Crudml.ecore#//SingleEntityReference">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//SingleEntityReference/one"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//SingleEntityReference/singlerefname"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Crudml.ecore#//SingleEntityReference/type"/>
+    <genClasses ecoreClass="Crudml.ecore#//Annotation">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Annotation/annotation"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Annotation/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Annotation/length"/>
     </genClasses>
     <genClasses ecoreClass="Crudml.ecore#//Role">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Role/name"/>

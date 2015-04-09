@@ -39,19 +39,12 @@ class LookupServiceGenerator extends BaseGenerator {
 		// first identify descritors for the entity, that we can use to search
 		var select = alias + "." + primaryTable
 		var text = ""
-		val descriptors = GeneratorUtilities.getDescriptors(e)
+		val descriptor = GeneratorUtilities.getDescriptor(e)
 		
-		if (descriptors.length > 0){
-			var descriptorTables = ""
-			for (Member m : descriptors){
-				descriptorTables += alias + "." + m.name.toUpperCase + ", "
-			}
-			
-			// remove ", "
-			descriptorTables = descriptorTables.substring(0, descriptorTables.length - 2)
-			
-			select = select + ", " + descriptorTables
-			text = "<text>  AND     UPPER(" + descriptorTables + ") LIKE UPPER(:text||'%') </text> "
+		if (descriptor != null){
+			var descriptorTable = alias + "." + descriptor.name.toUpperCase		
+			select = select + ", " + descriptorTable
+			text = "<text>  AND     UPPER(" + descriptorTable + ") LIKE UPPER(:text||'%') </text> "
 		}	
 		
 		//server component

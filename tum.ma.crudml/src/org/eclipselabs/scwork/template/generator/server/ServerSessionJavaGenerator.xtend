@@ -31,6 +31,7 @@ import org.eclipse.scout.rt.server.ServerJob;
 
 public class ServerSession extends AbstractServerSession {
   private static final long serialVersionUID = 1L;
+  private static boolean databaseDroppedAndCreated = false;
   private static IScoutLogger logger = ScoutLogManager.getLogger(ServerSession.class);
 
   public ServerSession() {

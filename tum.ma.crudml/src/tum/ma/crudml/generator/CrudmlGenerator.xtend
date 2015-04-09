@@ -50,6 +50,7 @@ class CrudmlGenerator implements IGenerator {
 	public static String dbUser = "minicrm"
 	public static String dbPassword = "minicrm"
 	public static String primaryKeyPostfix = "Nr"
+	public static int defaultStringLength = 100
 	
 	// Some local variables
 	private static Map<String, ExtendedFile> Files = new HashMap<String, ExtendedFile>()

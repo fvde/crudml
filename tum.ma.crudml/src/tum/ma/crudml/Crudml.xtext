@@ -1,11 +1,18 @@
 grammar tum.ma.crudml.Crudml with org.eclipse.xtext.common.Terminals
 
 generate crudml "http://www.ma.tum/crudml/Crudml"
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 Domainmodel:
   (elements += AbstractElement)*
 ;
- 
+/*
+terminal CUSTOMSTRING	: 
+			'"' ('0'..'9' | 'A'..'Z' | 'a'..'z' | 'Ä' | 'Ö' | 'Ü' | 'ä' | 'ö' | 'ü' | 'ß') ('0'..'9' | 'A'..'Z' | 'a'..'z' | ' ' | 'Ä' | 'Ö' | 'Ü' | 'ä' | 'ö' | 'ü' | 'ß')* ('0'..'9' | 'A'..'Z' | 'a'..'z' | 'Ä' | 'Ö' | 'Ü' | 'ä' | 'ö' | 'ü' | 'ß') '"' |
+			"'" ('0'..'9' | 'A'..'Z' | 'a'..'z' | 'Ä' | 'Ö' | 'Ü' | 'ä' | 'ö' | 'ü' | 'ß') ('0'..'9' | 'A'..'Z' | 'a'..'z' | ' ' | 'Ä' | 'Ö' | 'Ü' | 'ä' | 'ö' | 'ü' | 'ß')* ('0'..'9' | 'A'..'Z' | 'a'..'z' | 'Ä' | 'Ö' | 'Ü' | 'ä' | 'ö' | 'ü' | 'ß') "'"
+; 
+ */
+
 /* Package & import block */ 
 PackageDeclaration:
   'package' name = QualifiedName '{'
@@ -52,7 +59,7 @@ PersistenceEntry:
 ;
 
 DBConnectionDefinition:
-	(type = ('user' | 'password' | 'path') ':' value = ID)
+	((type = ('user' | 'password') ':' value = ID)) | (type = 'path' ':' value = STRING)
 ;
 
 DBTypeDefiniton:
@@ -65,33 +72,34 @@ DBSetupDefinition:
   
 /* Entity block */
 Entity:
-  (annotations += Annotation)*	
   'entity' name = ID             
   '{'
     (attributes += Attribute)*
   '}'
 ;
 
-/* Annotation block */
-Annotation:
-  '@' UiLevel
-;
-
-UiLevel:
-	'UiLevel'level = INT
-;
-
 /* Attribute block */
-Attribute:
+Attribute:	
 	Reference | Member
 ;
 
 Member:
+    (annotations += Annotation)*	
 	name = ID ':' (type = [Entity | QualifiedName] | primitive = ('string' | 'int' | 'boolean' | 'long' | 'double'))
 ;
 
 Reference:
+	(annotations += Annotation)*	
 	reftype = ('many' | 'one') name = ID ':' type = [Entity]
+;
+
+
+/* Annotation block */
+Annotation:
+	annotation ='@NotNull' | 
+	annotation = '@Descriptor' | 
+	annotation = '@Name('name = STRING')' |
+	annotation = '@Length('length = INT')'
 ;
 
 /* Operations block */

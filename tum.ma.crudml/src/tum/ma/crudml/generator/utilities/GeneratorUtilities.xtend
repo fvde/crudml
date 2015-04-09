@@ -6,6 +6,8 @@ import tum.ma.crudml.generator.access.Identifier
 import tum.ma.crudml.crudml.Entity
 import tum.ma.crudml.crudml.Member
 import tum.ma.crudml.crudml.Attribute
+import tum.ma.crudml.crudml.Annotation
+import tum.ma.crudml.generator.CrudmlGenerator
 
 class GeneratorUtilities {
 	def static getStringFromArray(Iterable<String> iterable){
@@ -59,27 +61,33 @@ class GeneratorUtilities {
 		return FileMarker.markerTag + identifier + FileMarker.markerAttributeTag + size + FileMarker.markerTag
 	}
 	
-	def static getDescriptors(Entity e){
-		var result = new ArrayList<Member>()
+	def static getDescriptor(Entity e){
+
+		// use descriptor annotation preferably
+		for (Attribute a : e.attributes){
+			if (a instanceof Member){
+				val member = a as Member
+					
+				if (isDescriptor(member.annotations)){
+					return member
+				}
+			}
+		}
 		
 		for (Attribute a : e.attributes){
 			if (a instanceof Member){
 				val member = a as Member
 				val name = member.name.toLowerCase
-				
+					
 				if (member.primitive.equals("string")){
 					// search for common keywords for descriptors
 					if (name.equals("name") || name.equals("id")){
-						result.add(member)
+						return member
 					}
 				}
-	
-				// also use descriptor annotation
-				// TODO
-			}
-		}
-		
-		return result
+			}		
+		}		
+		return null
 	}
 		
 	def static getDBTypeFromType(String type){
@@ -101,5 +109,41 @@ class GeneratorUtilities {
 			case "double" : return "Double"
 			case "boolean" : return "Boolean"
 		}
+	}
+	
+	def static getLength(Iterable<Annotation> annotations){
+		val a = getAnnotation(annotations, "@Length")
+		if (a != null){
+			return a.length
+		}
+
+		return CrudmlGenerator.defaultStringLength
 	}	
+	
+	def static notNull(Iterable<Annotation> annotations){
+		val a = getAnnotation(annotations, "@NotNull")
+		return a != null
+	}
+	
+	def static getName(Iterable<Annotation> annotations){
+		val a = getAnnotation(annotations, "@Name")
+		if (a != null){
+			return a.name
+		}
+
+		return ""
+	}
+	
+	def static isDescriptor(Iterable<Annotation> annotations){
+		val a = getAnnotation(annotations, "@Descriptor")
+		return a != null
+	}
+	
+	def static getAnnotation(Iterable<Annotation> annotations, String type){
+		for (Annotation a : annotations){
+			if (a.annotation.startsWith(type)){
+				return a
+			}
+		}
+	}
 }
