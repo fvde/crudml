@@ -28,9 +28,9 @@ class FormGenerator extends BaseGenerator{
 		
 		for (Entity e : entries){
 			registerInPlugins(e, fsa)
+			generateService(e, fsa)
 			modifyTablePage(e, fsa)
 			generateForm(e, fsa)
-			generateService(e, fsa)
 			generatePermissions(e, fsa)
 		}
 	}
@@ -59,6 +59,7 @@ import org.eclipse.scout.rt.client.ui.form.fields.longfield.AbstractLongField;
 import org.eclipse.scout.rt.client.ui.form.fields.stringfield.AbstractStringField;
 import org.eclipse.scout.rt.client.ui.form.fields.booleanfield.AbstractBooleanField;
 import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
+import org.eclipse.scout.rt.shared.data.form.fields.tablefield.AbstractTableFieldData;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.service.SERVICES;
 import «CrudmlGenerator.applicationName».client.ui.desktop.form.«name»Form.MainBox.CancelButton;
@@ -174,6 +175,7 @@ public class «name»Form extends AbstractForm {
     @Order(30.0)
     public class CancelButton extends AbstractCancelButton {
     }
+    «GeneratorUtilities.createMarker(Identifier.FormBoxButtons)»
   }
 
   public class ModifyHandler extends AbstractFormHandler {
@@ -239,6 +241,7 @@ import org.eclipse.scout.rt.shared.data.form.AbstractFormData;
 import org.eclipse.scout.rt.shared.data.form.ValidationRule;
 import org.eclipse.scout.rt.shared.data.form.fields.AbstractValueFieldData;
 import org.eclipse.scout.rt.shared.data.form.properties.AbstractPropertyData;
+import org.eclipse.scout.rt.shared.data.form.fields.tablefield.AbstractTableFieldData;
 
 /**
  * <b>NOTE:</b><br>
@@ -379,6 +382,8 @@ import org.eclipse.scout.rt.server.services.common.jdbc.SQL;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.security.ACCESS;
 import org.eclipse.scout.service.AbstractService;
+import org.eclipse.scout.commons.holders.ITableHolder;
+import org.eclipse.scout.commons.holders.TableHolderFilter;
 import «CrudmlGenerator.applicationName».shared.ui.desktop.form.«name»FormData;
 import «CrudmlGenerator.applicationName».shared.ui.desktop.form.Create«name»Permission;
 import «CrudmlGenerator.applicationName».shared.ui.desktop.form.I«name»Service;
@@ -398,6 +403,7 @@ public class «name»Service extends AbstractService implements I«name»Service
     }
 
 «sqlCreate»
+«GeneratorUtilities.createMarker(Identifier.ServiceSqlCreate)»
     return formData;
   }
 
@@ -408,6 +414,7 @@ public class «name»Service extends AbstractService implements I«name»Service
     }
     
 «sqlLoad»
+«GeneratorUtilities.createMarker(Identifier.ServiceSqlLoad)»
     return formData;
   }
   
@@ -437,8 +444,10 @@ public class «name»Service extends AbstractService implements I«name»Service
     }
 
 «sqlStore»
+«GeneratorUtilities.createMarker(Identifier.ServiceSqlStore)»
     return formData;
   }
+  «GeneratorUtilities.createMarker(Identifier.ServiceSqlHelper)»
 }
 ''')
 
@@ -552,21 +561,36 @@ public class «type + name»Permission extends BasicPermission {
 		var fieldDisplayName = ""
 		var fieldClass = ""
 		var fieldType = ""
+		var manyTargetName = ""
+		var manyBoxContent = ""
+		var manyImports = ""
+		var manyTableFormData = ""
+		var manyTableFormMember = ""
 		var lookUpCall = ""
 		var smartFieldImports = ""
 		var smartFieldPostfix = ""
 		var isMandatory = ""
 		var maxLength = ""
+		var tableNewButton = ""
+		var abstractTableFormType = "AbstractValueFieldData"
+		
+		val annotatedDisplayName = GeneratorUtilities.getName(a.annotations)
+		if (!annotatedDisplayName.isNullOrEmpty){
+			fieldDisplayName = annotatedDisplayName
+		}
 		
 		switch a {
 			case (a instanceof Member) : {
 				val m = a as Member
 				fieldName = m.name.toFirstUpper
-				fieldDisplayName = fieldName
+				if (fieldDisplayName.isNullOrEmpty){
+					fieldDisplayName = fieldName
+				}
 				fieldType = GeneratorUtilities.getJavaTypeFromType(m.primitive)
 				fieldClass = fieldType
+				fieldType = "<" + fieldType + ">"
 				
-				if (fieldType.equals("String")){
+				if (fieldClass.equals("String")){
 								isMandatory = 
 			'''
 
@@ -582,9 +606,11 @@ public class «type + name»Permission extends BasicPermission {
 				switch r.reftype {
 					case "one" : {
 						fieldName = r.name.toFirstUpper + CrudmlGenerator.primaryKeyPostfix
-						fieldDisplayName = r.name.toFirstUpper
+						if (fieldDisplayName.isNullOrEmpty){
+							fieldDisplayName = r.name.toFirstUpper
+						}
 						fieldClass = "Smart"
-						fieldType = "Long"
+						fieldType = "<Long>"
 						smartFieldPostfix = "<Long>"
 						lookUpCall = 
 						'''
@@ -601,7 +627,234 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
 						'''
 					}
 					case "many" : {
-						//TODO
+						fieldName = r.name.toFirstUpper
+						if (fieldDisplayName.isNullOrEmpty){
+							fieldDisplayName = r.name.toFirstUpper
+						}
+						manyTargetName = r.type.name.toFirstUpper
+						fieldClass = "Table"
+						abstractTableFormType = "AbstractTableFieldData"
+						
+						manyImports = 
+						'''
+import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractSmartColumn;
+import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractLinkButton;
+import org.eclipse.scout.rt.client.ui.form.fields.tablefield.AbstractTableField;
+import org.eclipse.scout.rt.extension.client.ui.action.menu.AbstractExtensibleMenu;
+import org.eclipse.scout.rt.extension.client.ui.basic.table.AbstractExtensibleTable;
+import «CrudmlGenerator.applicationName».client.ui.desktop.form.«e.name.toFirstUpper»Form.MainBox.New«manyTargetName»Button;
+import «CrudmlGenerator.applicationName».shared.services.lookup.«manyTargetName»LookupCall;
+						'''
+						
+						tableNewButton =
+						'''
+  
+  /**
+   * @return the New«manyTargetName»Button
+   */
+  public New«manyTargetName»Button getNew«manyTargetName»Button() {
+    return getFieldByClass(New«manyTargetName»Button.class);
+  }
+
+						'''
+						// insert new button into box
+						fsa.modifyLines(CrudmlGenerator.getFile(FileType.Form, entityName), Identifier.FormBoxButtons, 
+'''	
+
+    @Order(40.0)
+    public class New«manyTargetName»Button extends AbstractLinkButton {
+
+      @Override
+      protected String getConfiguredLabel() {
+        return TEXTS.get("New«manyTargetName»");
+      }
+
+      @Override
+      protected void execClickAction() throws ProcessingException {
+        get«fieldName»Field().getTable().addRowByArray(
+            new Object[]{null});
+      }
+    }
+''')
+						
+						manyBoxContent = 
+						'''
+        
+        @Override
+        protected int getConfiguredGridH() {
+          return 4;
+        }
+
+        @Override
+        protected int getConfiguredGridW() {
+          return 2;
+        }
+
+        @Override
+        protected boolean getConfiguredLabelVisible() {
+          return false;
+        }
+
+        @Order(10.0)
+        public class Table extends AbstractExtensibleTable {
+
+          @Override
+          protected boolean getConfiguredAutoResizeColumns() {
+            return true;
+          }
+          
+          /**
+           * @return the «fieldName»Column
+           */
+          public «fieldName»Column get«fieldName»Column() {
+            return getColumnSet().getColumnByClass(«fieldName»Column.class);
+          }
+
+          @Order(10.0)
+          public class «fieldName»Column extends AbstractSmartColumn<Long> {
+
+            @Override
+            protected String getConfiguredHeaderText() {
+              return TEXTS.get("«fieldName»Field");
+            }
+            
+            @Override
+            protected boolean getConfiguredEditable() {
+              return true;
+            }
+
+            @Override
+            protected Class<? extends ILookupCall<Long>> getConfiguredLookupCall() {
+              return «manyTargetName»LookupCall.class;
+            }
+          }
+
+          @Order(10.0)
+          public class Remove«manyTargetName»Menu extends AbstractExtensibleMenu {
+
+            @Override
+            protected String getConfiguredKeyStroke() {
+              return "delete";
+            }
+
+            @Override
+            protected String getConfiguredText() {
+              return TEXTS.get("Delete«manyTargetName»");
+            }
+
+            @Override
+            protected void execAction() throws ProcessingException {
+              for (ITableRow r : getSelectedRows()) {
+                deleteRow(r);
+              }
+            }
+          }
+        }
+						'''
+						
+						// also extend the tableformdata
+						val tableFormDataTableID = fieldName.toUpperCase + "_COLUMN_ID";
+						
+						manyTableFormMember =
+						'''
+    public static final int «tableFormDataTableID» = 0;
+						'''
+						
+						manyTableFormData =
+						'''
+    
+    public Long get«fieldName»(int row) {
+      return (Long) getValueInternal(row, «tableFormDataTableID»);
+    }
+
+    public void set«fieldName»(int row, Long «fieldName.toFirstLower») {
+      setValueInternal(row, «tableFormDataTableID», «fieldName.toFirstLower»);
+    }
+
+    @Override
+    public int getColumnCount() {
+      return 1;
+    }
+
+    @Override
+    public Object getValueAt(int row, int column) {
+      switch (column) {
+        case «tableFormDataTableID»:
+          return get«fieldName»(row);
+        default:
+          return null;
+      }
+    }
+
+    @Override
+    public void setValueAt(int row, int column, Object value) {
+      switch (column) {
+        case «tableFormDataTableID»:
+          set«fieldName»(row, (Long) value);
+          break;
+      }
+    }
+						'''
+						
+						// finally we need to extend the store and load statement in the service
+						var table = entityName + "_" + r.name
+						var idcolumn = entityName + CrudmlGenerator.primaryKeyPostfix
+						var targetcolumn = r.type.name + CrudmlGenerator.primaryKeyPostfix
+						
+						// load
+						fsa.modifyLines(CrudmlGenerator.getFile(FileType.TableService, entityName), Identifier.ServiceSqlLoad, 
+'''	
+
+  SQL.select("" +
+      "SELECT «targetcolumn.toUpperCase» " +
+      "FROM «table.toUpperCase» " +
+      "WHERE «idcolumn.toUpperCase» = :«idcolumn.toFirstLower» " +
+      "INTO :«fieldName.toFirstLower» ",
+      formData.get«fieldName»(),
+      formData);
+''')
+						// create helper method
+						fsa.modifyLines(CrudmlGenerator.getFile(FileType.TableService, entityName), Identifier.ServiceSqlHelper, 
+'''	
+
+private void update«fieldName»(«entityName»FormData formData) throws ProcessingException {
+// empty columns are deleted
+  for (int i = 0; i < formData.get«fieldName»().getRowCount(); i++) {
+    if (formData.get«fieldName»().get«fieldName»(i) == null) {
+      formData.get«fieldName»().setRowState(i, ITableHolder.STATUS_DELETED);
+    }
+  }
+ 
+  SQL.delete("" +
+      "DELETE FROM «table.toUpperCase» " +
+      "WHERE «idcolumn.toUpperCase» = :«idcolumn.toFirstLower» " +
+      "AND «targetcolumn.toUpperCase» = :{«fieldName.toFirstLower»}"
+      , new TableHolderFilter(formData.get«fieldName»(), ITableHolder.STATUS_DELETED)
+      , formData);
+ 
+  SQL.insert("" +
+      "INSERT INTO «table.toUpperCase» («idcolumn.toUpperCase», «targetcolumn.toUpperCase») " +
+      "VALUES (:«idcolumn.toFirstLower», :{«fieldName.toFirstLower»}) "
+      , new TableHolderFilter(formData.get«fieldName»(), ITableHolder.STATUS_INSERTED)
+      , formData);
+}
+''')
+						// store
+						fsa.modifyLines(CrudmlGenerator.getFile(FileType.TableService, entityName), Identifier.ServiceSqlCreate,
+'''	
+
+// get the newly created id
+SQL.select("SELECT MAX(«idcolumn.toUpperCase») " +
+    "FROM «entityName.toUpperCase» " +
+    "INTO :«idcolumn.toFirstLower»", formData);
+    
+update«fieldName»(formData);
+''')
+						fsa.modifyLines(CrudmlGenerator.getFile(FileType.TableService, entityName), Identifier.ServiceSqlStore,
+'''	
+update«fieldName»(formData);
+''')
 					}
 				}
 			}
@@ -619,15 +872,8 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
 			'''
 		}
 		
-		val annotatedDisplayName = GeneratorUtilities.getName(a.annotations)
-		if (!annotatedDisplayName.isNullOrEmpty){
-			fieldDisplayName = annotatedDisplayName
-		}
-		
 		// Register field name
-		// remove whitespaces
-		var displaynameIdentifier = fieldDisplayName.replace(' ', '').toFirstUpper
-		CrudmlGenerator.createStringEntry(displaynameIdentifier + "Field", fieldDisplayName, fsa)
+		CrudmlGenerator.createStringEntry(fieldName + "Field", fieldDisplayName, fsa)
 		
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.Form, entityName), Identifier.FormClassContent, 
 '''	
@@ -637,6 +883,7 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
   public «fieldName»Field get«fieldName»Field(){
     return getFieldByClass(«fieldName»Field.class);
   }
+  «tableNewButton»
 ''')
 
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.Form, entityName), Identifier.FormBoxContent, 
@@ -647,11 +894,12 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
 
         @Override
         protected String getConfiguredLabel() {
-          return TEXTS.get("«displaynameIdentifier»Field");
+          return TEXTS.get("«fieldName»Field");
         }
         «isMandatory»
         «maxLength»
         «lookUpCall»
+        «manyBoxContent»
       }
 ''')
 
@@ -659,6 +907,7 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
 '''	
 import «CrudmlGenerator.applicationName».client.ui.desktop.form.«entityName»Form.MainBox.«entityName»Box.«fieldName»Field;
 «smartFieldImports»
+«manyImports»
 ''')
 
 		// now the formData
@@ -669,12 +918,14 @@ import «CrudmlGenerator.applicationName».client.ui.desktop.form.«entityName»
     return getFieldByClass(«fieldName».class);
   }
   
-  public static class «fieldName» extends AbstractValueFieldData<«fieldType»> {
+  public static class «fieldName» extends «abstractTableFormType»«fieldType» {
 
     private static final long serialVersionUID = 1L;
+    «manyTableFormMember»
 
     public «fieldName»() {
     }
+    «manyTableFormData»
   }
 ''')
 		

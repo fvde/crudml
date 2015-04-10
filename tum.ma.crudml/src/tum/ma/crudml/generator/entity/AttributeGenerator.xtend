@@ -202,7 +202,15 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»C
 	def private generateReference(Entity e, Reference r, int position){
 		switch r.reftype {
 			case "one" : generateMember(e, r.name + CrudmlGenerator.primaryKeyPostfix, r.name, "long", position, false, r.annotations)
-			case "many" : { }
+			case "many" : { 
+				// in this case we need a table to map the relation
+				
+				fsa.modifyLines(CrudmlGenerator.getFile(FileType.ServerSession), Identifier.DBSetupStatements,
+'''	
+		queries.add("DROP TABLE «e.name.toUpperCase»_«r.name.toUpperCase»");
+		queries.add("CREATE TABLE «e.name.toUpperCase»_«r.name.toUpperCase» («e.name.toUpperCase + CrudmlGenerator.primaryKeyPostfix.toUpperCase» «GeneratorUtilities.getDBTypeFromType("long")» NOT NULL, «r.type.name.toUpperCase + CrudmlGenerator.primaryKeyPostfix.toUpperCase» «GeneratorUtilities.getDBTypeFromType("long")» NOT NULL)");
+''')
+			}
 		}
 	}
 	
