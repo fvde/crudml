@@ -57,6 +57,10 @@ class GeneratorUtilities {
 		createMarker(ident.toString + name, 0)
 	}
 	
+	def static createMarker(Identifier ident, String name, int size){
+		createMarker(ident.toString + name, size)
+	}
+	
 	def private static createMarker(String identifier, int size){
 		return FileMarker.markerTag + identifier + FileMarker.markerAttributeTag + size + FileMarker.markerTag
 	}

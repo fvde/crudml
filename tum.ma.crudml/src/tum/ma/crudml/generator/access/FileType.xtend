@@ -8,6 +8,8 @@ enum FileType {
 	TablePageData,
 	Form,
 	FormData,
+	SearchForm,
+	SearchFormData,
 	PermissionRead,
 	PermissionUpdate,
 	PermissionCreate,

@@ -111,7 +111,7 @@ class AttributeGenerator extends BaseGenerator{
 			dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + notNullString + " GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
 		}
 		dbColumns += memberName.toUpperCase + ", "
-		dbBindings += ":{" + memberName.toFirstLower + "}, "
+		dbBindings += ":{page." + memberName.toFirstLower + "}, "
 		
 		// create string for member name
 		CrudmlGenerator.createStringEntry(tableHeader.replace(' ', ''), tableHeader, fsa)
@@ -228,10 +228,14 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»C
 		
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutlineService), Identifier.SqlStatementGetTableData, e.name.toFirstUpper,
 '''
-SQL.selectInto("SELECT «dbColumns»" +
+statement.append(
+        "SELECT «dbColumns»" +
         " FROM  «e.name.toUpperCase»" +
-        " INTO «dbBindings»",
-        pageData);
+        " WHERE 1 = 1 ");
+''') 	
+		fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutlineService), Identifier.SqlStatementGetTableDataInto, e.name.toFirstUpper,
+'''
+    statement.append("INTO «dbBindings»");
 ''') 	
 	}
 }

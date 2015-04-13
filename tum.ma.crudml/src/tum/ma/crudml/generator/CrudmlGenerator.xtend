@@ -33,6 +33,7 @@ import tum.ma.crudml.crudml.DBSetupDefinition
 import tum.ma.crudml.crudml.DBConnectionDefinition
 import tum.ma.crudml.generator.entity.FormGenerator
 import tum.ma.crudml.generator.database.LookupServiceGenerator
+import tum.ma.crudml.generator.search.SearchGenerator
 
 /**
  * Generates code from your model files on save.
@@ -79,6 +80,7 @@ class CrudmlGenerator implements IGenerator {
 			new AttributeGenerator(10),
 			new FormGenerator(20),
 			new LookupServiceGenerator(30),
+			new SearchGenerator(40),
 			new CleanUpGenerator(100)
 		).sortBy[BaseGenerator x | x.priority]
 		

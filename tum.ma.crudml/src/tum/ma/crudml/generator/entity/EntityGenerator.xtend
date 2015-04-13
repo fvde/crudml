@@ -110,8 +110,9 @@ public class «e.name.toFirstUpper»TablePage extends AbstractPageWithTable<Tabl
   
   @Override
   protected void execLoadData(SearchFilter filter) throws ProcessingException {
-    importPageData(SERVICES.getService(IStandardOutlineService.class).get«e.name.toFirstUpper»TableData());
+«GeneratorUtilities.createMarker(Identifier.ExecLoadData, e.name.toFirstUpper, 1)»    importPageData(SERVICES.getService(IStandardOutlineService.class).get«e.name.toFirstUpper»TableData());
   }
+  «GeneratorUtilities.createMarker(Identifier.Content, e.name.toFirstUpper)»
 
   @Order(10.0)
   public class Table extends AbstractExtensibleTable {
@@ -200,10 +201,14 @@ public class «e.name.toFirstUpper»TablePageData extends AbstractTablePageData 
 '''
 
   @Override
-  public «e.name.toFirstUpper»TablePageData get«e.name.toFirstUpper»TableData() throws ProcessingException {
+  public «e.name.toFirstUpper»TablePageData get«e.name.toFirstUpper»TableData(«e.name.toFirstUpper»SearchFormData formData) throws ProcessingException {
+    StringBuilder statement = new StringBuilder();
+    «GeneratorUtilities.createMarker(Identifier.SqlStatementGetTableData, e.name.toFirstUpper)»
+    
+    «GeneratorUtilities.createMarker(Identifier.SqlStatementGetTableDataInto, e.name.toFirstUpper)»
+      
     «e.name.toFirstUpper»TablePageData pageData = new «e.name.toFirstUpper»TablePageData();
-
-  «GeneratorUtilities.createMarker(Identifier.SqlStatementGetTableData, e.name.toFirstUpper)»
+    SQL.selectInto(statement.toString(), formData, new NVPair("page", pageData));
 
     return pageData;
   }
@@ -213,6 +218,8 @@ public class «e.name.toFirstUpper»TablePageData extends AbstractTablePageData 
 '''
 import org.eclipse.scout.commons.exception.ProcessingException;
 import org.eclipse.scout.rt.server.services.common.jdbc.SQL;
+import org.eclipse.scout.commons.holders.NVPair;
+import org.eclipse.scout.commons.StringUtility;
 import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.«e.name.toFirstUpper»TablePageData;
 ''') 
 
@@ -225,12 +232,13 @@ import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.«e.
    * @return
    * @throws org.eclipse.scout.commons.exception.ProcessingException
    */
-  «e.name.toFirstUpper»TablePageData get«e.name.toFirstUpper»TableData() throws ProcessingException;
+  «e.name.toFirstUpper»TablePageData get«e.name.toFirstUpper»TableData(«e.name.toFirstUpper»SearchFormData formData) throws ProcessingException;
 ''') 
 
 		fsa.modifyLines(standardOutlineServiceInterface, Identifier.Imports,
 '''
 import org.eclipse.scout.commons.exception.ProcessingException;
+import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.searchform.«e.name.toFirstUpper»SearchFormData;
 import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.«e.name.toFirstUpper»TablePageData;
 ''') 
 	}
