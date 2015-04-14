@@ -62,6 +62,7 @@ import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
 import org.eclipse.scout.rt.shared.data.form.fields.tablefield.AbstractTableFieldData;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.service.SERVICES;
+import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import «CrudmlGenerator.applicationName».client.ui.desktop.form.«name»Form.MainBox.CancelButton;
 import «CrudmlGenerator.applicationName».client.ui.desktop.form.«name»Form.MainBox.«name»Box;
 import «CrudmlGenerator.applicationName».client.ui.desktop.form.«name»Form.MainBox.OkButton;

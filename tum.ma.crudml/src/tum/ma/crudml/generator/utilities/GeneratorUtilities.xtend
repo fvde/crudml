@@ -85,7 +85,7 @@ class GeneratorUtilities {
 					
 				if (member.primitive.equals("string")){
 					// search for common keywords for descriptors
-					if (name.equals("name") || name.equals("id")){
+					if (name.equals("name") || name.equals("id") || name.equals("title")){
 						return member
 					}
 				}
