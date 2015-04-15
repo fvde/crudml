@@ -1,0 +1,168 @@
+metadata {
+	author : unknown
+	applicationName : org.ossmeter.platform.mining.msr14.model
+	workspace : Org.ossmeter.platform.mining.msr14.model
+}
+
+entity Biodiversity {
+many users : User
+many projects : Project
+many projectMemberships : ProjectMembership
+}
+
+entity Measureable {
+many issueEvents : IssueEvent
+commitCount : int
+commitTotalChanges : int
+commitAdditions : int
+commitDeletions : int
+commitsAsAuthor : int
+commitsAsCommitter : int
+commitTotalFiles : int
+averageFilesPerCommit : double
+commitTimes : string
+commitCommentTimes : string
+pullRequestTimes : string
+pullRequestCommentTimes : string
+issueTimes : string
+issueCommentTimes : string
+numberOfIssues : int
+numberOfCommitComments : int
+numberOfIssueComments : int
+numberOfPullRequests : int
+numberOfPullRequestComments : int
+many artefacts : Artefact
+}
+
+entity User {
+many issueEvents : IssueEvent
+commitCount : int
+commitTotalChanges : int
+commitAdditions : int
+commitDeletions : int
+commitsAsAuthor : int
+commitsAsCommitter : int
+commitTotalFiles : int
+averageFilesPerCommit : double
+commitTimes : string
+commitCommentTimes : string
+pullRequestTimes : string
+pullRequestCommentTimes : string
+issueTimes : string
+issueCommentTimes : string
+numberOfIssues : int
+numberOfCommitComments : int
+numberOfIssueComments : int
+numberOfPullRequests : int
+numberOfPullRequestComments : int
+many artefacts : Artefact
+login : string
+ghId : string
+location : string
+publicRepos : int
+joinedDate : string
+followerCount : int
+followingCount : int
+many followers : User
+many following : User
+many watches : Project
+many forks : Project
+numerOfWatches : int
+numberOfForks : int
+publicGists : int
+many projects : ProjectMembership
+}
+
+entity ProjectMembership {
+many issueEvents : IssueEvent
+commitCount : int
+commitTotalChanges : int
+commitAdditions : int
+commitDeletions : int
+commitsAsAuthor : int
+commitsAsCommitter : int
+commitTotalFiles : int
+averageFilesPerCommit : double
+commitTimes : string
+commitCommentTimes : string
+pullRequestTimes : string
+pullRequestCommentTimes : string
+issueTimes : string
+issueCommentTimes : string
+numberOfIssues : int
+numberOfCommitComments : int
+numberOfIssueComments : int
+numberOfPullRequests : int
+numberOfPullRequestComments : int
+many artefacts : Artefact
+owner : unknown
+orgMember : unknown
+collaborator : unknown
+projectName : string
+projectOwner : string
+userName : string
+many project : Project
+many user : User
+}
+
+entity Project {
+many issueEvents : IssueEvent
+commitCount : int
+commitTotalChanges : int
+commitAdditions : int
+commitDeletions : int
+commitsAsAuthor : int
+commitsAsCommitter : int
+commitTotalFiles : int
+averageFilesPerCommit : double
+commitTimes : string
+commitCommentTimes : string
+pullRequestTimes : string
+pullRequestCommentTimes : string
+issueTimes : string
+issueCommentTimes : string
+numberOfIssues : int
+numberOfCommitComments : int
+numberOfIssueComments : int
+numberOfPullRequests : int
+numberOfPullRequestComments : int
+many artefacts : Artefact
+ghId : string
+name : string
+ownerName : string
+createdAt : string
+size : int
+watchersCount : int
+watchersCount2 : int
+language : string
+forks : int
+forksCount : int
+openIssuesCount : int
+openIssues : int
+networkCount : int
+many owner : User
+many watchers : User
+}
+
+entity IssueEvent {
+eventKind : unknown
+count : int
+}
+
+entity Commits {
+count : int
+totalChanges : int
+additions : int
+deletions : int
+asAuthor : int
+asCommitter : int
+totalFiles : int
+averageFilesPerCommit : double
+commitTimes : string
+}
+
+entity Artefact {
+extension : string
+count : int
+}
+

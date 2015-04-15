@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClassifier;
@@ -20,7 +21,17 @@ public class EMFImporter {
 				+ System.getProperty("user.dir"));
 
 		String dir = "";
-		String fileName = "library.ecore";
+		
+		String[] availableFiles = {
+			"esmodel.ecore"	,
+			"store.ecore",
+			"crudml.ecore",
+			"libary.ecore",
+			"bowling.ecore",
+			"biodiversity.ecore"
+		};
+		
+		String fileName = availableFiles[1];
 		String path = dir + fileName;
 
 		EMFImporter importer = new EMFImporter();

@@ -1,0 +1,45 @@
+metadata {
+	author : unknown
+	applicationName : esmodel
+	workspace : Esmodel
+}
+
+entity ProjectHistory {
+many projectId : ProjectId
+one versions : Version
+projectName : string
+projectDescription : string
+}
+
+entity ProjectInfo {
+name : string
+description : string
+one projectId : ProjectId
+one version : PrimaryVersionSpec
+}
+
+entity SessionId {
+}
+
+entity ServerSpace {
+many groups : ACGroup
+many projects : ProjectHistory
+many openSessions : SessionId
+many users : ACUser
+}
+
+entity ProjectId {
+}
+
+entity VersionInfo {
+emfStoreVersionString : string
+}
+
+entity ClientVersionInfo {
+version : string
+name : string
+}
+
+entity FileIdentifier {
+}
+

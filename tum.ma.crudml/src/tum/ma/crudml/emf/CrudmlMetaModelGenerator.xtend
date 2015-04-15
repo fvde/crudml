@@ -64,9 +64,10 @@ class CrudmlMetaModelGenerator {
 		while (classes.length > 0) {
 			val current = classes.pop
 			loopSafetyMeasure++
-			
-			if (loopSafetyMeasure > 100){
-				throw new Exception("Endless loop in super types detected, aborting. Remaining classes: " + classes.toString)
+
+			if (loopSafetyMeasure > 100) {
+				throw new Exception(
+					"Endless loop in super types detected, aborting. Remaining classes: " + classes.toString)
 			}
 
 			if (current.ESuperTypes.length > 0 && classes.contains(current.ESuperTypes.get(0))) {
@@ -77,16 +78,19 @@ class CrudmlMetaModelGenerator {
 					'''
 						entity «current.name.toFirstUpper» {
 					''')
+
 				// process super class attributes if there are any
 				// at this point we can assume that the super class has been process already
-				if (current.ESuperTypes.length > 0){
+				if (current.ESuperTypes.length > 0) {
 					val superClass = current.ESuperTypes.get(0)
-					for (String superAttribute : attributes.get(superClass.name.toFirstUpper)){
-						stringBuilder.append(superAttribute);
-						attributes.get(current.name.toFirstUpper).add(superAttribute)
+					if (superClass.name != null) {
+						for (String superAttribute : attributes.get(superClass.name.toFirstUpper)) {
+							stringBuilder.append(superAttribute);
+							attributes.get(current.name.toFirstUpper).add(superAttribute)
+						}
 					}
-				}			
-					
+				}
+
 				for (EObject o : current.eContents()) {
 					System.out.println("Parsing " + current.name + ": " + o.toString + "...");
 					generateAttribute(o, current.name.toFirstUpper, stringBuilder)
@@ -140,13 +144,18 @@ class CrudmlMetaModelGenerator {
 	private def getType(EDataType eType) {
 		var name = eType.name
 
-		switch name {
-			case name.endsWith("String"): return "string"
-			case name.endsWith("Int"): return "int"
-			case name.endsWith("Double"): return "double"
-			case name.endsWith("Long"): return "long"
+		if (name == null) {
+			return "unknown:" + name
 		}
 
-		return "unknown"
+		switch name {
+			case name.contains("String"): return "string"
+			case name.contains("Int"): return "int"
+			case name.contains("Double"): return "double"
+			case name.contains("Long"): return "long"
+			case name.contains("Boolean") : return "boolean"
+		}
+
+		return "unknown:" + name
 	}
 }

@@ -1,0 +1,445 @@
+metadata {
+	author : unknown
+	applicationName : store
+	workspace : Store
+}
+
+entity Project {
+id : int
+name : string
+many hasAuthorizedUsers : User
+many concreteRevisions : ConcreteRevision
+many revisions : Revision
+many lastConcreteRevision : ConcreteRevision
+many lastRevision : Revision
+many checkouts : Checkout
+state : unknown
+createdDate : unknown
+many createdBy : User
+many geoTag : GeoTag
+many subProjects : Project
+many parent : Project
+description : string
+many clashDetectionSettings : ClashDetectionSettings
+exportLengthMeasurePrefix : unknown
+many extendedData : ExtendedData
+}
+
+entity User {
+name : string
+password : string
+many hasRightsOn : Project
+many revisions : Revision
+state : unknown
+createdOn : unknown
+many createdBy : User
+userType : unknown
+username : string
+lastSeen : unknown
+validationToken : string
+validationTokenCreated : unknown
+notificationUrl : string
+many schemas : ExtendedDataSchema
+many extendedData : ExtendedData
+}
+
+entity Clash {
+name1 : string
+name2 : string
+type1 : string
+type2 : string
+many revision1 : Revision
+many revision2 : Revision
+}
+
+entity EidClash {
+name1 : string
+name2 : string
+type1 : string
+type2 : string
+many revision1 : Revision
+many revision2 : Revision
+eid1 : long
+eid2 : long
+}
+
+entity GuidClash {
+name1 : string
+name2 : string
+type1 : string
+type2 : string
+many revision1 : Revision
+many revision2 : Revision
+guid1 : string
+guid2 : string
+}
+
+entity ClashDetectionSettings {
+enabled : boolean
+many projects : Project
+margin : double
+many revisions : Revision
+ignoredClasses : string
+}
+
+entity Revision {
+id : int
+many user : User
+date : unknown
+comment : string
+size : long
+many concreteRevisions : ConcreteRevision
+many lastConcreteRevision : ConcreteRevision
+many checkouts : Checkout
+many project : Project
+many lastClashes : Clash
+tag : string
+lastError : string
+bmi : int
+nrClashes : int
+laid : long
+many extendedData : ExtendedData
+}
+
+entity ConcreteRevision {
+id : int
+many project : Project
+checksum : unknown
+many revisions : Revision
+size : long
+date : unknown
+lastError : string
+many user : User
+}
+
+entity GeoTag {
+enabled : boolean
+many projects : Project
+x : double
+y : double
+z : double
+epsg : int
+directionAngle : double
+}
+
+entity Checkout {
+many user : User
+many revision : Revision
+many project : Project
+date : unknown
+many checkin : Revision
+active : boolean
+}
+
+entity Settings {
+showVersionUpgradeAvailable : boolean
+sendConfirmationEmailAfterRegistration : boolean
+useCaching : boolean
+allowSelfRegistration : boolean
+autoTestClashes : boolean
+intelligentMerging : boolean
+allowUsersToCreateTopLevelProjects : boolean
+checkinMergingEnabled : boolean
+registrationAddition : string
+smtpServer : string
+emailSenderAddress : string
+customLogoAddress : string
+siteAddress : string
+hideUserListForNonAdmin : boolean
+protocolBuffersPort : int
+many serializers : Serializer
+many objectIDMs : ObjectIDM
+headerAddition : string
+footerAddition : string
+mergeIdentifier : unknown
+cacheOutputFiles : boolean
+many ifcEngines : IfcEngine
+many plugins : Plugin
+many deserializers : Deserializer
+many schemas : ExtendedDataSchema
+}
+
+entity Serializer {
+name : string
+description : string
+extension : string
+contentType : string
+className : string
+enabled : boolean
+defaultSerializer : boolean
+many objectIDM : ObjectIDM
+many settings : Settings
+many ifcEngine : IfcEngine
+}
+
+entity ObjectIDM {
+name : string
+className : string
+enabled : boolean
+many serializers : Serializer
+many settings : Settings
+}
+
+entity IfcEngine {
+name : string
+active : boolean
+className : string
+enabled : boolean
+many serializers : Serializer
+many settings : Settings
+}
+
+entity Plugin {
+name : string
+enabled : boolean
+many settings : Settings
+}
+
+entity Deserializer {
+name : string
+description : string
+className : string
+enabled : boolean
+defaultDeserializer : boolean
+many settings : Settings
+}
+
+entity CheckinResult {
+many revision : Revision
+many project : Project
+progress : int
+lastError : string
+status : unknown
+}
+
+entity DownloadResult {
+projectName : string
+revisionNr : int
+file : unknown
+}
+
+entity CheckoutResult {
+projectName : string
+revisionNr : int
+file : unknown
+}
+
+entity DataValue {
+fieldName : string
+}
+
+entity DataObject {
+type : string
+guid : string
+name : string
+many values : DataValue
+}
+
+entity UserSession {
+many user : User
+username : string
+name : string
+type : unknown
+remoteAddress : string
+activeSince : unknown
+lastActive : unknown
+accessMethod : unknown
+}
+
+entity Migration {
+number : int
+description : string
+executed : boolean
+}
+
+entity ReferenceDataValue {
+fieldName : string
+typeName : string
+guid : string
+}
+
+entity ListDataValue {
+fieldName : string
+many values : DataValue
+}
+
+entity SimpleDataValue {
+fieldName : string
+stringValue : string
+}
+
+entity DatabaseInformationItem {
+key : string
+value : string
+}
+
+entity DatabaseInformationCategory {
+title : string
+many items : DatabaseInformationItem
+}
+
+entity DatabaseInformation {
+numberOfProjects : int
+numberOfUsers : int
+numberOfRevisions : int
+numberOfCheckouts : int
+databaseSizeInBytes : long
+type : string
+created : unknown
+location : string
+schemaVersion : int
+many categories : DatabaseInformationCategory
+}
+
+entity SerializerPluginDescriptor {
+pluginClassName : string
+defaultName : string
+defaultExtension : string
+defaultContentType : string
+}
+
+entity DeserializerPluginDescriptor {
+pluginClassName : string
+defaultName : string
+}
+
+entity RevisionSummaryType {
+name : string
+count : int
+}
+
+entity RevisionSummaryContainer {
+name : string
+many types : RevisionSummaryType
+}
+
+entity RevisionSummary {
+many list : RevisionSummaryContainer
+}
+
+entity PluginDescriptor {
+name : string
+description : string
+location : string
+enabled : boolean
+}
+
+entity LongAction {
+identification : string
+many user : User
+start : unknown
+username : string
+name : string
+}
+
+entity LongCheckinAction {
+identification : string
+many user : User
+start : unknown
+username : string
+name : string
+many revisions : Revision
+}
+
+entity ObjectIDMPluginDescriptor {
+className : string
+}
+
+entity CompareItem {
+many dataObject : DataObject
+}
+
+entity ObjectAdded {
+many dataObject : DataObject
+}
+
+entity ObjectRemoved {
+many dataObject : DataObject
+}
+
+entity ObjectModified {
+many dataObject : DataObject
+fieldName : string
+oldValue : string
+newValue : string
+}
+
+entity CompareContainer {
+type : string
+many items : CompareItem
+}
+
+entity CompareResult {
+many items : CompareContainer
+}
+
+entity LongActionState {
+progress : int
+state : unknown
+}
+
+entity Notification {
+}
+
+entity NewProjectNotification {
+many project : Project
+}
+
+entity NewRevisionNotification {
+many revision : Revision
+many project : Project
+}
+
+entity CompileResult {
+compileOke : boolean
+warnings : string
+errors : string
+}
+
+entity RunResult {
+runOke : boolean
+warnings : string
+errors : string
+output : string
+}
+
+entity ServerInfo {
+serverState : unknown
+errorMessage : string
+}
+
+entity Version {
+major : int
+minor : int
+revision : int
+date : unknown
+downloadUrl : string
+supportUrl : string
+supportEmail : string
+}
+
+entity IfcEnginePluginDescriptor {
+pluginClassName : string
+defaultName : string
+}
+
+entity ExtendedDataSchema {
+name : string
+url : string
+data : unknown
+validate : boolean
+type : unknown
+many settings : Settings
+many users : User
+many extendedData : ExtendedData
+}
+
+entity ExtendedData {
+url : string
+data : unknown
+title : string
+added : unknown
+many user : User
+many schema : ExtendedDataSchema
+}
+

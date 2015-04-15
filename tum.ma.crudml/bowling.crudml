@@ -1,0 +1,30 @@
+metadata {
+	author : unknown
+	applicationName : bowling
+	workspace : Bowling
+}
+
+entity Player {
+name : string
+dateOfBirth : unknown
+}
+
+entity League {
+name : string
+many players : Player
+}
+
+entity Tournament {
+many matchups : Matchup
+type : unknown
+}
+
+entity Matchup {
+many games : Game
+}
+
+entity Game {
+many matchup : Matchup
+many player : Player
+}
+
