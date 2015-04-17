@@ -40,16 +40,21 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Entity/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Crudml.ecore#//Entity/attributes"/>
     </genClasses>
+    <genClasses ecoreClass="Crudml.ecore#//Enum">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Enum/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Enum/values"/>
+    </genClasses>
     <genClasses ecoreClass="Crudml.ecore#//Attribute">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Crudml.ecore#//Attribute/annotations"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Attribute/name"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Crudml.ecore#//Attribute/type"/>
     </genClasses>
     <genClasses ecoreClass="Crudml.ecore#//Member">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Crudml.ecore#//Member/enumeration"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Member/primitive"/>
     </genClasses>
     <genClasses ecoreClass="Crudml.ecore#//Reference">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Reference/reftype"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Crudml.ecore#//Reference/type"/>
     </genClasses>
     <genClasses ecoreClass="Crudml.ecore#//Annotation">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Crudml.ecore#//Annotation/annotation"/>

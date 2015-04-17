@@ -102,6 +102,7 @@ class GeneratorUtilities {
 			case "double" : return "DOUBLE"
 			case "boolean" : return "BOOLEAN"
 			case "date" : return "DATE"
+			case "enum" : return "BIGINT"
 		}
 	}
 	
@@ -112,6 +113,7 @@ class GeneratorUtilities {
 			case "long" : return "Long"
 			case "double" : return "Double"
 			case "boolean" : return "Boolean"
+			case "enum" : return "Long"
 		}
 	}
 	

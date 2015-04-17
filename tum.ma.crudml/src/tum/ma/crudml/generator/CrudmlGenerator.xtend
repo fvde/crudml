@@ -34,6 +34,7 @@ import tum.ma.crudml.crudml.DBConnectionDefinition
 import tum.ma.crudml.generator.entity.FormGenerator
 import tum.ma.crudml.generator.database.LookupServiceGenerator
 import tum.ma.crudml.generator.search.SearchGenerator
+import tum.ma.crudml.generator.entity.EnumGenerator
 
 /**
  * Generates code from your model files on save.
@@ -51,6 +52,7 @@ class CrudmlGenerator implements IGenerator {
 	public static String dbUser = "minicrm"
 	public static String dbPassword = "minicrm"
 	public static String primaryKeyPostfix = "Nr"
+	public static String codeTypePostfix = "Uid"
 	public static int defaultStringLength = 100
 	
 	// Some local variables
@@ -77,6 +79,7 @@ class CrudmlGenerator implements IGenerator {
 			new MetadataGenerator(5),
 			new ServerSqlServiceGenerator(5),
 			new EntityGenerator(5),
+			new EnumGenerator(6),
 			new AttributeGenerator(10),
 			new FormGenerator(20),
 			new LookupServiceGenerator(30),

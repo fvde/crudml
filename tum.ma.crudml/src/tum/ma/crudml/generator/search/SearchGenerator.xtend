@@ -210,7 +210,15 @@ public class «name»SearchFormData extends AbstractFormData {
 	def generateFormField(Entity e, Attribute a, ExtendedFileSystemAccess fsa){
 		val entityName = e.name.toFirstUpper
 		var fieldName = a.name.toFirstUpper
+		var dbFieldName = fieldName
 		var member = a as Member
+		
+		if (member.enumeration != null){
+			member.primitive = "enum"
+			dbFieldName += CrudmlGenerator.codeTypePostfix.toUpperCase
+			fieldName += "Code"
+		}
+		
 		var fieldDisplayName = fieldName
 		var fieldType = GeneratorUtilities.getJavaTypeFromType(member.primitive)
 		var innerClassType = fieldType
@@ -218,7 +226,7 @@ public class «name»SearchFormData extends AbstractFormData {
 		var classContent = ""
 		var fieldOrBox = ""
 		var fromToImports = ""
-		val isLongOrInt = fieldType.equals("Long") || fieldType.equals("Integer")
+		val isLongOrInt = (fieldType.equals("Long") || fieldType.equals("Integer")) && member.enumeration == null
 		
 		val annotatedDisplayName = GeneratorUtilities.getName(a.annotations)
 		if (!annotatedDisplayName.isNullOrEmpty){
@@ -321,20 +329,20 @@ import «CrudmlGenerator.applicationName».client.ui.desktop.outlines.pages.sear
 			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutlineService), Identifier.SqlStatementGetTableData, entityName,
 '''	
 if (formData.get«fieldName»From().getValue() != null) {
-      statement.append("AND «fieldName.toUpperCase» >= :«fieldName.toFirstLower»From ");
+      statement.append("AND «dbFieldName.toUpperCase» >= :«fieldName.toFirstLower»From ");
     }
 ''')
 			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutlineService), Identifier.SqlStatementGetTableData, entityName,
 '''	
 if (formData.get«fieldName»To().getValue() != null) {
-      statement.append("AND «fieldName.toUpperCase» <= :«fieldName.toFirstLower»To ");
+      statement.append("AND «dbFieldName.toUpperCase» <= :«fieldName.toFirstLower»To ");
     }
 ''')
 		} else {
 			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutlineService), Identifier.SqlStatementGetTableData, entityName,
 '''	
 if (!StringUtility.isNullOrEmpty(formData.get«fieldName»().getValue())) {
-      statement.append("AND UPPER(«fieldName.toUpperCase») LIKE UPPER(:«fieldName.toFirstLower» || '%') ");
+      statement.append("AND UPPER(«dbFieldName.toUpperCase») LIKE UPPER(:«fieldName.toFirstLower» || '%') ");
     }
 ''')
 		}

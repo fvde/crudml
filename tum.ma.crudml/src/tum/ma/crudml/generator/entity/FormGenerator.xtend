@@ -315,9 +315,17 @@ public class «name»FormData extends AbstractFormData {
 				case (a instanceof Member) : {
 					hasAttributes = true
 					val attribute = a as Member
-					tableNames += attribute.name.toUpperCase + ", "
-					bindings += ":" + attribute.name.toFirstLower + ", "
-					setTable += attribute.name.toUpperCase + " = :" + attribute.name.toFirstLower + ", "
+					var table = attribute.name.toUpperCase
+					var binding = attribute.name.toFirstLower
+										
+					if (attribute.enumeration != null){
+						table += CrudmlGenerator.codeTypePostfix.toUpperCase
+						binding += "Code"
+					}
+					
+					tableNames += table + ", "
+					bindings += ":" + binding + ", "
+					setTable += table + " = :" + binding + ", "
 				}
 				case (a instanceof Reference) : {
 					val r = a as Reference
@@ -587,12 +595,32 @@ public class «type + name»Permission extends BasicPermission {
 				if (fieldDisplayName.isNullOrEmpty){
 					fieldDisplayName = fieldName
 				}
-				fieldType = GeneratorUtilities.getJavaTypeFromType(m.primitive)
-				fieldClass = fieldType
-				fieldType = "<" + fieldType + ">"
+				if (m.enumeration != null){
+					fieldName += "Code"
+					smartFieldPostfix = "<Long>"
+					fieldType = "<Long>"
+					fieldClass = "Smart"
+					lookUpCall = 
+						'''
+						
+						@Override
+						protected Class<? extends ICodeType<?, Long>> getConfiguredCodeType() {
+						     return «fieldName»Type.class;
+						}
+						'''
+						smartFieldImports = 
+						'''
+import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
+import «CrudmlGenerator.applicationName».shared.codetypes.«fieldName»Type;
+						'''
+				} else {			
+					fieldType = GeneratorUtilities.getJavaTypeFromType(m.primitive)
+					fieldClass = fieldType
+					fieldType = "<" + fieldType + ">"
+				}
 				
 				if (fieldClass.equals("String")){
-								isMandatory = 
+								maxLength = 
 			'''
 
         @Override

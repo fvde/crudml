@@ -55,7 +55,7 @@ class AttributeGenerator extends BaseGenerator{
 			// If no attribute was marked as primary we add a primary key column
 			if (!hasPrimary){
 				var name = e.name + CrudmlGenerator.primaryKeyPostfix
-				generateMember(e, name, name, "long", position, true, Arrays.asList())		
+				generateMember(e, name, name, "long", position, true, Arrays.asList(), null)		
 			}
 				
 			// create db tables 
@@ -66,19 +66,32 @@ class AttributeGenerator extends BaseGenerator{
 		
 	def private generateMember(Entity e, Member m, int memberPosition, boolean isPrimary){
 		var displayName = GeneratorUtilities.getName(m.annotations)
+		var primitive = m.primitive
+		var name = m.name
 		
 		if (displayName.isNullOrEmpty){
 			displayName = m.name
 		}
 		
-		generateMember(e, m.name, displayName, m.primitive, memberPosition, isPrimary, m.annotations)
+		// Check if its an enum
+		if (m.enumeration != null){
+			primitive = "enum"
+		}
+		
+		generateMember(e, name, displayName, primitive, memberPosition, isPrimary, m.annotations, m.enumeration)
 	}
 	
-	def private generateMember(Entity e, String memberName, String displayName, String primitiveType, int memberPosition, boolean isPrimary, Iterable<Annotation> annotations){
+	def private generateMember(Entity e, String memberName, String displayName, String primitiveType, int memberPosition, boolean isPrimary, Iterable<Annotation> annotations, tum.ma.crudml.crudml.Enum enumeration){
 		var tableType = ""
+		var tableClass = ""
+		var tablePostfix = ""
 		var tableImport = ""
 		var tableProperties = ""
+		var smartFieldContent = ""
+		var dbName = memberName
+		var dbBindingName = memberName
 		var tableWidth = 200;
+		var imports = ""
 		var name = memberName.toFirstUpper
 		var entityName = e.name.toFirstUpper
 		var tableHeader = displayName.toFirstUpper
@@ -104,14 +117,41 @@ class AttributeGenerator extends BaseGenerator{
 		
 		tableType = GeneratorUtilities.getJavaTypeFromType(primitiveType)
 		
+		if (primitiveType.equals("enum")){
+			tableClass = "Smart"
+			tablePostfix = "<Long>"
+			dbName += CrudmlGenerator.codeTypePostfix
+			dbBindingName = memberName + "Code"
+			var enumName = enumeration.name.toFirstUpper
+			
+			name += "Code"
+			
+			// getter for code type
+			smartFieldContent = 
+			'''
+			@Override
+			protected Class<? extends ICodeType<?, Long>> getConfiguredCodeType() {
+				return «enumName»CodeType.class;
+			}
+			'''
+			
+			imports += 
+			'''
+			import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
+			import «CrudmlGenerator.applicationName».shared.codetypes.«enumName»CodeType;
+			''';
+		} else {
+			tableClass = tableType
+		}
+		
 		// database creation string
 		if (!isPrimary){
-			dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + notNullString + ", "
+			dbCreationString += dbName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + notNullString + ", "
 		} else {
-			dbCreationString += memberName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + notNullString + " GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
+			dbCreationString += dbName.toUpperCase + " " + GeneratorUtilities.getDBTypeFromType(primitiveType) + stringLength + notNullString + " GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1), "
 		}
-		dbColumns += memberName.toUpperCase + ", "
-		dbBindings += ":{page." + memberName.toFirstLower + "}, "
+		dbColumns += dbName.toUpperCase + ", "
+		dbBindings += ":{page." + dbBindingName.toFirstLower + "}, "
 		
 		// create string for member name
 		CrudmlGenerator.createStringEntry(tableHeader.replace(' ', ''), tableHeader, fsa)
@@ -163,14 +203,16 @@ class AttributeGenerator extends BaseGenerator{
     }
 
     @Order(«memberPosition.toString».0)
-    public class «name»Column extends Abstract«tableType»Column {
+    public class «name»Column extends Abstract«tableClass»Column«tablePostfix» {
 «tableProperties»
+«smartFieldContent»
     }
 ''')
 		// imports
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.TablePage, entityName), Identifier.Imports, entityName,
 '''	
-import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»Column;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableClass»Column;
+«imports»
 ''')
 		// add member to table page data
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.TablePageData, entityName), Identifier.Members, entityName,
@@ -201,7 +243,7 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.Abstract«tableType»C
 	
 	def private generateReference(Entity e, Reference r, int position){
 		switch r.reftype {
-			case "one" : generateMember(e, r.name + CrudmlGenerator.primaryKeyPostfix, r.name, "long", position, false, r.annotations)
+			case "one" : generateMember(e, r.name + CrudmlGenerator.primaryKeyPostfix, r.name, "long", position, false, r.annotations, null)
 			case "many" : { 
 				// in this case we need a table to map the relation
 				

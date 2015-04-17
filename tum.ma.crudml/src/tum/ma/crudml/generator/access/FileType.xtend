@@ -26,5 +26,6 @@ enum FileType {
 	StandardOutlineService,
 	IStandardOutlineService,
 	SharedManifest,
-	Texts
+	Texts,
+	CodeType
 }

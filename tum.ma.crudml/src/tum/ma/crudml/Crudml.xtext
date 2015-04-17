@@ -21,7 +21,7 @@ PackageDeclaration:
 ;
  
 AbstractElement:
-  PackageDeclaration | Entity | Import | Right | Role | Metadata | Persistence
+  PackageDeclaration | Entity | Import | Right | Role | Metadata | Persistence | Enum
 ;
  
 QualifiedName:
@@ -78,6 +78,13 @@ Entity:
   '}'
 ;
 
+Enum:
+  'enum' name = ID             
+  '{'
+    (values += ID)*
+  '}'
+;
+
 /* Attribute block */
 Attribute:	
 	Reference | Member
@@ -85,7 +92,7 @@ Attribute:
 
 Member:
     (annotations += Annotation)*	
-	name = ID ':' (type = [Entity | QualifiedName] | primitive = ('string' | 'int' | 'boolean' | 'long' | 'double'))
+	name = ID ':' (enumeration = [Enum] | (primitive = ('string' | 'int' | 'boolean' | 'long' | 'double')))
 ;
 
 Reference:

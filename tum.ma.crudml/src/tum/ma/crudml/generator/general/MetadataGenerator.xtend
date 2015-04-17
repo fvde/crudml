@@ -37,6 +37,7 @@ class MetadataGenerator extends BaseGenerator{
 		fsa.modifyLines(CrudmlGenerator.getFile(FileType.SharedManifest), Identifier.ExportPackages,
 ''' «CrudmlGenerator.applicationName».shared.ui.desktop.form,
  «CrudmlGenerator.applicationName».shared.services.lookup,
+ «CrudmlGenerator.applicationName».shared.codetypes,
  «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.searchform,
  «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages
 ''') 
