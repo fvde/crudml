@@ -597,6 +597,7 @@ public class «type + name»Permission extends BasicPermission {
 				}
 				if (m.enumeration != null){
 					fieldName += "Code"
+					var codeType = m.enumeration.name.toFirstUpper + "CodeType"
 					smartFieldPostfix = "<Long>"
 					fieldType = "<Long>"
 					fieldClass = "Smart"
@@ -605,13 +606,13 @@ public class «type + name»Permission extends BasicPermission {
 						
 						@Override
 						protected Class<? extends ICodeType<?, Long>> getConfiguredCodeType() {
-						     return «fieldName»Type.class;
+						     return «codeType».class;
 						}
 						'''
 						smartFieldImports = 
 						'''
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
-import «CrudmlGenerator.applicationName».shared.codetypes.«fieldName»Type;
+import «CrudmlGenerator.applicationName».shared.codetypes.«codeType»;
 						'''
 				} else {			
 					fieldType = GeneratorUtilities.getJavaTypeFromType(m.primitive)
