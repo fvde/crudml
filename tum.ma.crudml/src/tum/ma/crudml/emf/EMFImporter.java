@@ -31,7 +31,7 @@ public class EMFImporter {
 			"biodiversity.ecore"
 		};
 		
-		String fileName = availableFiles[1];
+		String fileName = availableFiles[0];
 		String path = dir + fileName;
 
 		EMFImporter importer = new EMFImporter();

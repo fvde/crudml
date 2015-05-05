@@ -88,6 +88,12 @@ import java.util.ArrayList
 	}
 	
 	def modifyLines(ExtendedFile file, Identifier identifier, String name, String modification){
+		
+		if (file == null){
+			// this should never happen!
+			return;
+		}
+		
 		val marker = file.getMarker(identifier, name, this)
 		
 		if (marker == null){

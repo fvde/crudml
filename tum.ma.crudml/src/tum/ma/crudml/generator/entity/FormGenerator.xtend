@@ -571,6 +571,7 @@ public class «type + name»Permission extends BasicPermission {
 		var fieldClass = ""
 		var fieldType = ""
 		var manyTargetName = ""
+		var manyLookupCallType = ""
 		var manyBoxContent = ""
 		var manyImports = ""
 		var manyTableFormData = ""
@@ -661,7 +662,8 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«r.type.name.
 						if (fieldDisplayName.isNullOrEmpty){
 							fieldDisplayName = r.name.toFirstUpper
 						}
-						manyTargetName = r.type.name.toFirstUpper
+						manyLookupCallType = r.type.name.toFirstUpper
+						manyTargetName = r.name.toFirstUpper
 						fieldClass = "Table"
 						abstractTableFormType = "AbstractTableFieldData"
 						
@@ -674,7 +676,7 @@ import org.eclipse.scout.rt.client.ui.form.fields.tablefield.AbstractTableField;
 import org.eclipse.scout.rt.extension.client.ui.action.menu.AbstractExtensibleMenu;
 import org.eclipse.scout.rt.extension.client.ui.basic.table.AbstractExtensibleTable;
 import «CrudmlGenerator.applicationName».client.ui.desktop.form.«e.name.toFirstUpper»Form.MainBox.New«manyTargetName»Button;
-import «CrudmlGenerator.applicationName».shared.services.lookup.«manyTargetName»LookupCall;
+import «CrudmlGenerator.applicationName».shared.services.lookup.«manyLookupCallType»LookupCall;
 						'''
 						
 						tableNewButton =
@@ -756,7 +758,7 @@ import «CrudmlGenerator.applicationName».shared.services.lookup.«manyTargetNa
 
             @Override
             protected Class<? extends ILookupCall<Long>> getConfiguredLookupCall() {
-              return «manyTargetName»LookupCall.class;
+              return «manyLookupCallType»LookupCall.class;
             }
           }
 

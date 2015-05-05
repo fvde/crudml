@@ -16,6 +16,9 @@ import org.eclipse.emf.ecore.EClass
 import java.util.Queue
 import java.util.Deque
 import java.util.ArrayDeque
+import org.eclipse.emf.ecore.EEnum
+import org.eclipse.emf.ecore.EEnumLiteral
+import org.eclipse.emf.ecore.impl.EEnumImpl
 
 class CrudmlMetaModelGenerator {
 
@@ -38,7 +41,7 @@ class CrudmlMetaModelGenerator {
 		val metaModelFile = new File(outputDir + metaModelName.toString + ".crudml")
 
 		var writer = new BufferedWriter(new FileWriter(metaModelFile));
-		var stringBuilder = new StringBuilder();
+		val stringBuilder = new StringBuilder();
 
 		// add some metadata first
 		stringBuilder.append(
@@ -49,16 +52,42 @@ class CrudmlMetaModelGenerator {
 					workspace : «metaModelName.toFirstUpper»
 				}
 				
+				persistence {
+					password : minicrm
+					user : minicrm
+					type : derby
+					path : "C:\\\\db\\\\DerbyDB"
+					setup : dropAndCreate
+				}
+				
 			''')
 
 		// Iterate through package contents and add to file
-		for (EClassifier e : content.getEClassifiers()) {
-			System.out.println("Parsing " + e.name + "...");
+//		for (EClassifier e : content.getEClassifiers()) {
+//			System.out.println("Parsing " + e.name + "...");
+//
+//			if (e instanceof EClass) {
+//				classes.add(e)
+//			}
+//			
+//			// enums we can process right away
+//			if (e instanceof EEnum){
+//				generateEnum(e as EEnum, stringBuilder)
+//			}
+//		}
+		
+		content.eAllContents.forEach[EObject e |
+			System.out.println("Parsing " + e.toString + "...");
 
 			if (e instanceof EClass) {
 				classes.add(e)
 			}
-		}
+			
+			// enums we can process right away
+			if (e instanceof EEnum){
+				generateEnum(e as EEnum, stringBuilder)
+			}		
+		]
 
 		// process types with supertypes gradually
 		while (classes.length > 0) {
@@ -109,6 +138,29 @@ class CrudmlMetaModelGenerator {
 		//Close writer
 		writer.close();
 	}
+	
+	private def generateEnum(EEnum e, StringBuilder builder){
+		var enumName = e.name.toFirstUpper
+		
+		builder.append(
+					'''
+						enum «enumName» {
+					''')
+					
+		for (EEnumLiteral literal : e.ELiterals){
+			builder.append(
+					'''
+						«literal.name.toFirstUpper»
+					''')
+		}
+					
+		builder.append(
+					'''
+						}
+						
+					''')
+		
+	}
 
 	private def generateAttribute(EObject o, String entityName, StringBuilder builder) {
 		var typePrefix = ""
@@ -147,6 +199,10 @@ class CrudmlMetaModelGenerator {
 		if (name == null) {
 			return "unknown:" + name
 		}
+		
+		if (eType instanceof EEnumImpl){
+			return name;
+		}
 
 		switch name {
 			case name.contains("String"): return "string"
@@ -154,6 +210,9 @@ class CrudmlMetaModelGenerator {
 			case name.contains("Double"): return "double"
 			case name.contains("Long"): return "long"
 			case name.contains("Boolean") : return "boolean"
+			// TODO enventually
+			case name.contains("Date") : return "string"
+			case name.contains("Object") : return "string"
 		}
 
 		return "unknown:" + name

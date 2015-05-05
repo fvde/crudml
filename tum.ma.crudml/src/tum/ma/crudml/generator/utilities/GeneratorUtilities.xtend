@@ -83,10 +83,12 @@ class GeneratorUtilities {
 				val member = a as Member
 				val name = member.name.toLowerCase
 					
-				if (member.primitive.equals("string")){
-					// search for common keywords for descriptors
-					if (name.equals("name") || name.equals("id") || name.equals("title")){
-						return member
+				if (member.primitive != null){
+					if (member.primitive.equals("string")){
+						// search for common keywords for descriptors
+						if (name.equals("name") || name.equals("id") || name.equals("title")){
+							return member
+						}
 					}
 				}
 			}		

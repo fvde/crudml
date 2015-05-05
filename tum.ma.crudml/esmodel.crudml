@@ -4,6 +4,35 @@ metadata {
 	workspace : Esmodel
 }
 
+persistence {
+	password : minicrm
+	user : minicrm
+	type : derby
+	path : "C:\\\\db\\\\DerbyDB"
+	setup : dropAndCreate
+}
+
+enum ContainmentType {
+NONE
+CONTAINER
+CONTAINMENT
+}
+
+enum MergeChoiceSelection {
+Mine
+Their
+Issue
+MergedText
+}
+
+enum MergeGlobalChoiceSelection {
+AllMine
+AllTheir
+Cancel
+OKNotFinished
+OKFinished
+}
+
 entity ProjectHistory {
 many projectId : ProjectId
 one versions : Version
@@ -41,5 +70,490 @@ name : string
 }
 
 entity FileIdentifier {
+}
+
+entity VersionSpec {
+}
+
+entity LogMessage {
+author : string
+message : string
+date : string
+clientDate : string
+}
+
+entity ChangePackage {
+many operations : AbstractOperation
+many events : Event
+many logMessage : LogMessage
+many notifications : ESNotification
+many versionProperties : VersionProperty
+}
+
+entity HistoryInfo {
+one primerySpec : PrimaryVersionSpec
+one logMessage : LogMessage
+many tagSpecs : TagVersionSpec
+many versionProperties : VersionProperty
+many changePackage : ChangePackage
+}
+
+entity HistoryQuery {
+many source : PrimaryVersionSpec
+many target : PrimaryVersionSpec
+includeChangePackage : boolean
+}
+
+entity Version {
+one primarySpec : PrimaryVersionSpec
+many tagSpecs : TagVersionSpec
+many nextVersion : Version
+many previousVersion : Version
+many changes : ChangePackage
+many logMessage : LogMessage
+}
+
+entity HeadVersionSpec {
+}
+
+entity VersionProperty {
+name : string
+value : string
+}
+
+entity AbstractOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+}
+
+entity CompositeOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+many subOperations : AbstractOperation
+many mainOperation : AbstractOperation
+compositeName : string
+compositeDescription : string
+reversed : boolean
+}
+
+entity FeatureOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+}
+
+entity CreateDeleteOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+delete : boolean
+many modelElement : EObject
+many subOperations : ReferenceOperation
+many eObjectToIdMap : EObjectToModelElementIdMap
+}
+
+entity AttributeOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+oldValue : string
+newValue : string
+}
+
+entity MultiAttributeOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+add : boolean
+indexes : int
+referencedValues : string
+}
+
+entity MultiAttributeSetOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+index : int
+oldValue : string
+newValue : string
+}
+
+entity MultiAttributeMoveOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+oldIndex : int
+newIndex : int
+referencedValue : string
+}
+
+entity MultiReferenceMoveOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+oldIndex : int
+newIndex : int
+}
+
+entity ReferenceOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+bidirectional : boolean
+oppositeFeatureName : string
+containmentType : ContainmentType
+}
+
+entity DiagramLayoutOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+oldValue : string
+newValue : string
+}
+
+entity OperationId {
+}
+
+entity OperationGroup {
+name : string
+many operations : AbstractOperation
+}
+
+entity ModelElementGroup {
+name : string
+}
+
+entity EObjectToModelElementIdMap {
+many key : EObject
+}
+
+entity SemanticCompositeOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+many subOperations : AbstractOperation
+many mainOperation : AbstractOperation
+compositeName : string
+compositeDescription : string
+reversed : boolean
+}
+
+entity Event {
+timestamp : string
+}
+
+entity ReadEvent {
+timestamp : string
+sourceView : string
+readView : string
+}
+
+entity MergeEvent {
+timestamp : string
+numberOfConflicts : int
+totalTime : int
+many baseVersion : PrimaryVersionSpec
+many targetVersion : PrimaryVersionSpec
+many localChanges : AbstractOperation
+}
+
+entity CheckoutEvent {
+timestamp : string
+many baseVersion : PrimaryVersionSpec
+}
+
+entity ExceptionEvent {
+timestamp : string
+exceptionTitle : string
+exceptionStackTrace : string
+exceptionCauseTitle : string
+exceptionCauseStackTrace : string
+}
+
+entity PluginStartEvent {
+timestamp : string
+pluginId : string
+}
+
+entity UpdateEvent {
+timestamp : string
+many baseVersion : PrimaryVersionSpec
+many targetVersion : PrimaryVersionSpec
+}
+
+entity AnnotationEvent {
+timestamp : string
+}
+
+entity RevertEvent {
+timestamp : string
+revertedChangesCount : int
+}
+
+entity ShowHistoryEvent {
+timestamp : string
+many sourceVersion : PrimaryVersionSpec
+many targetVersion : PrimaryVersionSpec
+}
+
+entity PerspectiveEvent {
+timestamp : string
+}
+
+entity DNDEvent {
+timestamp : string
+sourceView : string
+targetView : string
+}
+
+entity LinkEvent {
+timestamp : string
+sourceView : string
+createdNew : boolean
+}
+
+entity TraceEvent {
+timestamp : string
+featureName : string
+}
+
+entity NavigatorCreateEvent {
+timestamp : string
+dynamic : boolean
+}
+
+entity PluginFocusEvent {
+timestamp : string
+pluginId : string
+startDate : string
+}
+
+entity PresentationSwitchEvent {
+timestamp : string
+readView : string
+newPresentation : string
+}
+
+entity UndoEvent {
+timestamp : string
+many operation : AbstractOperation
+}
+
+entity Validate {
+timestamp : string
+}
+
+entity ShowChangesEvent {
+timestamp : string
+many sourceVersion : PrimaryVersionSpec
+many targetVersion : PrimaryVersionSpec
+}
+
+entity NotificationReadEvent {
+timestamp : string
+sourceView : string
+readView : string
+notificationId : string
+}
+
+entity NotificationGenerationEvent {
+timestamp : string
+many notifications : ESNotification
+}
+
+entity NotificationIgnoreEvent {
+timestamp : string
+notificationId : string
+}
+
+entity URLEvent {
+timestamp : string
+sourceView : string
+}
+
+entity MergeChoiceEvent {
+timestamp : string
+many myAcceptedChanges : OperationId
+many theirRejectedChanges : OperationId
+selection : MergeChoiceSelection
+contextFeature : string
+createdIssueName : string
+}
+
+entity MergeGlobalChoiceEvent {
+timestamp : string
+selection : MergeGlobalChoiceSelection
+}
+
+entity ServerEvent {
+timestamp : string
+}
+
+entity ServerProjectEvent {
+timestamp : string
+many projectId : ProjectId
+}
+
+entity ProjectUpdatedEvent {
+timestamp : string
+many projectId : ProjectId
+many newVersion : PrimaryVersionSpec
+}
+
+entity ACOrgUnit {
+name : string
+many roles : Role
+description : string
+many properties : OrgUnitProperty
+}
+
+entity ACGroup {
+name : string
+many roles : Role
+description : string
+many properties : OrgUnitProperty
+many members : ACOrgUnit
+}
+
+entity ACOrgUnitId {
+}
+
+entity OrgUnitProperty {
+name : string
+value : string
+many project : ProjectId
+}
+
+entity Role {
+many projects : ProjectId
+}
+
+entity ReaderRole {
+many projects : ProjectId
+}
+
+entity WriterRole {
+many projects : ProjectId
+}
+
+entity ProjectAdminRole {
+many projects : ProjectId
+}
+
+entity ServerAdmin {
+many projects : ProjectId
+}
+
+entity ESNotification {
+name : string
+message : string
+details : string
+seen : boolean
+creationDate : string
+provider : string
+sender : string
+recipient : string
+many project : ProjectId
+many relatedOperations : OperationId
+}
+
+entity ServerUrl {
+hostName : string
+port : int
+}
+
+entity ProjectUrlFragment {
+name : string
+many projectId : ProjectId
+}
+
+entity ModelElementUrlFragment {
+name : string
+}
+
+entity ModelElementUrl {
+many serverUrl : ServerUrl
+many projectUrlFragment : ProjectUrlFragment
+many modelElementUrlFragment : ModelElementUrlFragment
+}
+
+entity TagVersionSpec {
+name : string
+}
+
+entity DateVersionSpec {
+date : string
+}
+
+entity PrimaryVersionSpec {
+identifier : int
+}
+
+entity SingleReferenceOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+bidirectional : boolean
+oppositeFeatureName : string
+containmentType : ContainmentType
+}
+
+entity MultiReferenceSetOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+bidirectional : boolean
+oppositeFeatureName : string
+containmentType : ContainmentType
+index : int
+}
+
+entity MultiReferenceOperation {
+name : string
+description : string
+accepted : boolean
+clientDate : string
+featureName : string
+bidirectional : boolean
+oppositeFeatureName : string
+containmentType : ContainmentType
+add : boolean
+index : int
+}
+
+entity ACUser {
+name : string
+many roles : Role
+description : string
+many properties : OrgUnitProperty
+firstName : string
+lastName : string
 }
 

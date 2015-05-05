@@ -205,6 +205,12 @@ public class «name»SearchFormData extends AbstractFormData {
 				formBoxOrder += 10
 			}
 		}
+		
+		// import the search form
+		fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutlineService), Identifier.Imports,
+'''	
+import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.searchform.«name»SearchFormData;
+''')
 	}
 	
 	def generateFormField(Entity e, Attribute a, ExtendedFileSystemAccess fsa){
@@ -338,7 +344,7 @@ if (formData.get«fieldName»To().getValue() != null) {
       statement.append("AND «dbFieldName.toUpperCase» <= :«fieldName.toFirstLower»To ");
     }
 ''')
-		} else {
+		} else if (fieldType.equals("String")){
 			fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutlineService), Identifier.SqlStatementGetTableData, entityName,
 '''	
 if (!StringUtility.isNullOrEmpty(formData.get«fieldName»().getValue())) {
@@ -346,12 +352,6 @@ if (!StringUtility.isNullOrEmpty(formData.get«fieldName»().getValue())) {
     }
 ''')
 		}
-
-		// imports in standard outline import
-		fsa.modifyLines(CrudmlGenerator.getFile(FileType.StandardOutlineService), Identifier.Imports,
-'''	
-import «CrudmlGenerator.applicationName».shared.ui.desktop.outlines.pages.searchform.«entityName»SearchFormData;
-''')
 	}
 	
 	def registerSearchForm(Entity e, ExtendedFileSystemAccess fsa){
