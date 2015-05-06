@@ -1,23 +1,21 @@
 package tum.ma.crudml.emf
 
-import org.eclipse.emf.ecore.EPackage
-import java.io.File
 import java.io.BufferedWriter
+import java.io.File
 import java.io.FileWriter
-import org.eclipse.emf.ecore.EClassifier
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EReference
-import org.eclipse.emf.ecore.EAttribute
-import org.eclipse.emf.ecore.EDataType
-import java.util.Map
-import java.util.ArrayList
-import java.util.HashMap
-import org.eclipse.emf.ecore.EClass
-import java.util.Queue
-import java.util.Deque
 import java.util.ArrayDeque
+import java.util.ArrayList
+import java.util.Deque
+import java.util.HashMap
+import java.util.Map
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EDataType
 import org.eclipse.emf.ecore.EEnum
 import org.eclipse.emf.ecore.EEnumLiteral
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EPackage
+import org.eclipse.emf.ecore.EReference
 import org.eclipse.emf.ecore.impl.EEnumImpl
 
 class CrudmlMetaModelGenerator {
